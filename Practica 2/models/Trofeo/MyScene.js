@@ -1,10 +1,10 @@
 
 // Clases de la biblioteca
 
-import * as THREE from '../libs/three.module.js'
-import { GUI } from '../libs/dat.gui.module.js'
-import { TrackballControls } from '../libs/TrackballControls.js'
-import { Stats } from '../libs/stats.module.js'
+import * as THREE from '../../libs/three.module.js'
+import { GUI } from '../../libs/dat.gui.module.js'
+import { TrackballControls } from '../../libs/TrackballControls.js'
+import { Stats } from '../../libs/stats.module.js'
 
 // Clases de mi proyecto
 
@@ -100,7 +100,7 @@ class MyScene extends THREE.Scene {
     var geometryGround = new THREE.BoxGeometry (10,0.2,10);
     
     // El material se hará con una textura de madera
-    var texture = new THREE.TextureLoader().load('../imgs/wood.jpg');
+    var texture = new THREE.TextureLoader().load('../../imgs/wood.jpg');
     var materialGround = new THREE.MeshStandardMaterial ({map: texture});
     
     // Ya se puede construir el Mesh

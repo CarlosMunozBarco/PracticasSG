@@ -1,5 +1,5 @@
-import * as THREE from '../libs/three.module.js'
-import { CSG } from '../libs/CSG-v2.js'
+import * as THREE from '../../libs/three.module.js'
+import { CSG } from '../../libs/CSG-v2.js'
 
  
 class Trofeo extends THREE.Object3D {
@@ -17,6 +17,8 @@ class Trofeo extends THREE.Object3D {
 
     var box = new THREE.BoxGeometry(1,0.5,1);
     var boxMesh = new THREE.Mesh(box,material);
+    var uno = this.crearUno();
+    uno.position.set(1,1,0);
     boxMesh.position.y = 0.25;
 
     var shape = new THREE.Shape();
@@ -27,11 +29,11 @@ class Trofeo extends THREE.Object3D {
     shape.quadraticCurveTo(0.4,0.8,0.5,1.3);
     shape.lineTo(0,1.3);
     var points = shape.extractPoints().shape;
-    var lathe = new THREE.LatheGeometry(points,64,0,Math.PI*2);
+    var lathe = new THREE.LatheGeometry(points,32,0,Math.PI*2);
     var latheMesh = new THREE.Mesh(lathe,material);
     latheMesh.position.y = 0.5;
 
-    var cilindro = new THREE.CylinderGeometry(0.05,0.05,1.8,64,64);
+    var cilindro = new THREE.CylinderGeometry(0.05,0.05,1.8,32,32);
     var cilindroMesh = new THREE.Mesh(cilindro,material);
     cilindroMesh.rotateX(Math.PI/2);
     cilindroMesh.position.y = 1.7;
@@ -46,16 +48,51 @@ class Trofeo extends THREE.Object3D {
     auxMesh.position.y = 2.75;
 
     var csg = new CSG();
+    
     csg.union([cilindroMesh,toroMesh]);
     csg.subtract([auxMesh]);
+    csg.union([boxMesh]);
     csg.union([latheMesh]);
     
 
     var mesh = csg.toMesh(material);
-
-    this.add(boxMesh);
     this.add(mesh);
+    this.add(uno);
 
+  } 
+
+  crearUno(){
+    var shape = new THREE.Shape();
+
+    shape.moveTo(0, 0);
+    
+    shape.lineTo(0, 2);
+    
+    shape.lineTo(1, 2);
+    
+    shape.lineTo(1, 0);
+    
+    shape.lineTo(0, 0);
+
+    // Definir los parámetros de la extrusión
+    const options1 = {
+        steps: 2,
+        depth: 0.1,
+        bevelEnabled: false,
+        bevelThickness: 1,
+        bevelSize: 1,
+        bevelSegments: 1
+    };
+
+    var geometry = new THREE.ExtrudeGeometry(shape, options1);
+
+    // Crear el material
+    var material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+
+    // Crear la malla (mesh)
+    var mesh = new THREE.Mesh(geometry, material);
+
+    return mesh;
   }
 
 
