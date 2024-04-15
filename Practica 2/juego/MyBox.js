@@ -5,6 +5,7 @@ class MyBox extends THREE.Object3D {
     super();
     
     // Se crea la parte de la interfaz que corresponde a la caja
+    //Comprobando que funciona
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui,titleGui);
     
