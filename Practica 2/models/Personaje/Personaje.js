@@ -15,6 +15,7 @@ class Personaje extends THREE.Object3D {
     materialLoader.load ('./Formula_1_mesh.mtl', (materials) => {
       objetoLoader.setMaterials(materials);
       objetoLoader.load('./Formula_1_mesh.obj', (object) => {
+        object.scale.set(0.01,0.01,0.01);
         this.add(object);
       }, null , null);
     });

@@ -1,5 +1,5 @@
-import * as THREE from '../libs/three.module.js'
-import { CSG } from '../libs/CSG-v2.js'
+import * as THREE from '../../libs/three.module.js'
+import { CSG } from '../../libs/CSG-v2.js'
  
 class Tuerca extends THREE.Object3D {
   constructor(gui,titleGui) {
@@ -60,15 +60,45 @@ class Tuerca extends THREE.Object3D {
     figura.lineTo(0.41,0.45);
     figura.lineTo(0.41,0.46);
     figura.lineTo(0.4,0.46);
-    figura.lineTo(0.4,0.7);
+    figura.lineTo(0.4,0.49);
+    figura.lineTo(0.41,0.49);
+    figura.lineTo(0.41,0.50);
+    figura.lineTo(0.4,0.50);
+    figura.lineTo(0.4,0.53);
+    figura.lineTo(0.41,0.53);
+    figura.lineTo(0.41,0.54);
+    figura.lineTo(0.4,0.54);
+    figura.lineTo(0.4,0.57);
+    figura.lineTo(0.41,0.57);
+    figura.lineTo(0.41,0.58);
+    figura.lineTo(0.4,0.58);
+    figura.lineTo(0.4,0.61);
+    figura.lineTo(0.41,0.61);
+    figura.lineTo(0.41,0.62);
+    figura.lineTo(0.4,0.62);
+    figura.lineTo(0.4,0.65);
+    figura.lineTo(0.41,0.65);
+    figura.lineTo(0.41,0.66);
+    figura.lineTo(0.4,0.66);
+    figura.lineTo(0.4,0.69);
+    figura.lineTo(0.41,0.69);
+    figura.lineTo(0.41,0.70);
+    figura.lineTo(0.4,0.70);
+    figura.lineTo(0.4,0.73);
+    figura.lineTo(0.41,0.73);
+    figura.lineTo(0.41,0.74);
+    figura.lineTo(0.4,0.74);
+    figura.lineTo(0.4,0.77);
+    figura.lineTo(0.41,0.77);
+    figura.lineTo(0.41,0.78);
 
 
     var points = figura.extractPoints().shape;
     var interior = new THREE.LatheGeometry(points, 64, 0, Math.PI*2);
     var interiorMesh = new THREE.Mesh(interior, material);
-    interiorMesh.position.y = -0.1;
+    interiorMesh.position.y = -0.4;
 
-    var sphere = new THREE.SphereGeometry(0.99, 32, 64);
+    var sphere = new THREE.SphereGeometry(0.99, 64, 64);
     var sphereMesh = new THREE.Mesh(sphere, material);
 
 
