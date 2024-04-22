@@ -10,7 +10,8 @@ class PistaMaestra extends THREE.Object3D {
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui,titleGui);
     
-    var tubo = new MyTubo(10);
+    //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
+    var tubo = new MyTubo(10, 20, 5, 20);
     this.add(tubo);
   }
   

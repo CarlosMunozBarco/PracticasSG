@@ -22,15 +22,26 @@ class MyTubo extends THREE.Object3D {
   crearCamino(radio){
 
     var pts = [];
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 18; i++) {
         const ang = (i / 20) * Math.PI * 2;
         const x = radio * Math.cos(ang);
         const y = radio * Math.sin(ang);
         const punto = new THREE.Vector3(x, y, 0);
         pts.push(punto);
     }
-    // Añadir el primer punto al final para cerrar el círculo
-    pts.push(pts[0].clone());
+  
+    var recta = pts[pts.length - 1].clone();
+    recta.x += 15;
+    pts.push(recta);
+
+    for (let i = 0; i < 18; i++) {
+      const ang = (i / 20) * Math.PI * 2;
+      const x = radio * Math.cos(ang) + 15;
+      const y = radio * Math.sin(ang) ;
+      const punto = new THREE.Vector3(x, y, 15);
+      pts.push(punto);
+  }
+
     return pts;
 
   } 
