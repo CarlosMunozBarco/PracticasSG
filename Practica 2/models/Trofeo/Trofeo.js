@@ -18,7 +18,7 @@ class Trofeo extends THREE.Object3D {
     var box = new THREE.BoxGeometry(1,0.5,1);
     var boxMesh = new THREE.Mesh(box,material);
     var uno = this.crearUno();
-    uno.position.set(1,1,0);
+    
     boxMesh.position.y = 0.25;
 
     var shape = new THREE.Shape();
@@ -66,13 +66,16 @@ class Trofeo extends THREE.Object3D {
 
     shape.moveTo(0, 0);
     
-    shape.lineTo(0, 2);
+    shape.lineTo(0, 1.3);
     
-    shape.lineTo(1, 2);
+    shape.lineTo(0.15, 1.3);
     
-    shape.lineTo(1, 0);
+    shape.lineTo(0.5, 0.7);
     
-    shape.lineTo(0, 0);
+    shape.lineTo(0.4, 0.7);
+
+    shape.lineTo(0.15, 1.1)
+    shape.lineTo(0.15, 0);
 
     // Definir los parámetros de la extrusión
     const options1 = {
@@ -87,11 +90,16 @@ class Trofeo extends THREE.Object3D {
     var geometry = new THREE.ExtrudeGeometry(shape, options1);
 
     // Crear el material
-    var material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+    var material = new THREE.MeshNormalMaterial();
 
     // Crear la malla (mesh)
-    var mesh = new THREE.Mesh(geometry, material);
+    var mesh = new THREE.Mesh(geometry, material);  
 
+    mesh.rotateY(-90*Math.PI/180);
+    mesh.position.x += 0.55;
+    mesh.scale.set(0.5,0.38,0.5);
+    mesh.position.z -= 0.05;
+    
     return mesh;
   }
 
