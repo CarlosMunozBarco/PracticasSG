@@ -1,6 +1,8 @@
 import * as THREE from '../libs/three.module.js'
 import { MyTubo } from  '../models/Tubo/MyTubo.js'
- 
+import { Personaje } from  '../models/Personaje/Personaje.js'
+import * as Tween from '../libs/tween.esm.js'
+
 class PistaMaestra extends THREE.Object3D {
   constructor(gui,titleGui) {
     super();
@@ -11,8 +13,33 @@ class PistaMaestra extends THREE.Object3D {
     this.createGUI(gui,titleGui);
     
     //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
-    var tubo = new MyTubo(10, 20, 5, 20);
+    var tubo = new MyTubo(10);
     this.add(tubo);
+    
+    var personaje = new Personaje(gui, titleGui);
+    this.add(personaje);
+    personaje.scale.set(5,5,5);
+    var pts = tubo.obtenerPuntos(10);
+    this.spline = new THREE.CatmullRomCurve3(pts);
+    this.segmentos = 100;
+    this.binormales = this.spline.computeFrenetFrames(this.segmentos, true).binormals;
+
+    var origen = {t : 0};
+    var fin = {t : 1};
+    var tiempoDeRecorrido = 10000;
+
+    var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(()=> {
+      var posicion = this.spline.getPointAt(origen.t);
+      personaje.position.copy(posicion);
+      var tangente = this.spline.getTangentAt(origen.t);
+      posicion.add(tangente);
+      personaje.up = this.binormales[Math.floor(origen.t * this.segmentos)];
+      personaje.lookAt(posicion);
+    })
+
+    animacion.start();
+    animacion.update();
+    
   }
   
   createGUI (gui,titleGui) {

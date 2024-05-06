@@ -1,8 +1,10 @@
 import * as THREE from '../../libs/three.module.js'
+
  
 class MyTubo extends THREE.Object3D {
   constructor(radio) {
     super();
+    
     
     var pts = this.crearCamino(radio);
     var path = new THREE.CatmullRomCurve3(pts, true);
@@ -18,6 +20,11 @@ class MyTubo extends THREE.Object3D {
     meshTubo.rotateX(90*(Math.PI/180));
     this.add(meshTubo);
   }
+
+  obtenerPuntos(radio){
+    return this.crearCamino(radio);
+  }
+  
 
   crearCamino(radio){
 
