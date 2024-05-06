@@ -17,8 +17,18 @@ class PistaMaestra extends THREE.Object3D {
     this.add(tubo);
     
     var personaje = new Personaje(gui, titleGui);
+    
+
+    var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    personaje.add(camera);
+    camera.position.set(-0.5, 3, 0);
+    var puntoDeMiraRelativo = new THREE.Vector3(0, -1, 0.5);
+    var target = new THREE.Vector3();
+    camera.getWorldPosition(target);
+    target.add(puntoDeMiraRelativo);
+    camera.lookAt(target);
     this.add(personaje);
-    personaje.scale.set(5,5,5);
+    //personaje.scale.set(2,2,2);
     var pts = tubo.obtenerPuntos(10);
     this.spline = new THREE.CatmullRomCurve3(pts);
     this.segmentos = 100;
@@ -26,7 +36,7 @@ class PistaMaestra extends THREE.Object3D {
 
     var origen = {t : 0};
     var fin = {t : 1};
-    var tiempoDeRecorrido = 10000;
+    var tiempoDeRecorrido = 20000;
 
     var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(()=> {
       var posicion = this.spline.getPointAt(origen.t);
@@ -38,7 +48,8 @@ class PistaMaestra extends THREE.Object3D {
     })
 
     animacion.start();
-    animacion.update();
+
+
     
   }
   
@@ -105,6 +116,7 @@ class PistaMaestra extends THREE.Object3D {
     this.position.set (this.guiControls.posX,this.guiControls.posY,this.guiControls.posZ);
     this.rotation.set (this.guiControls.rotX,this.guiControls.rotY,this.guiControls.rotZ);
     this.scale.set (this.guiControls.sizeX,this.guiControls.sizeY,this.guiControls.sizeZ);
+    Tween.update();
   }
 }
 

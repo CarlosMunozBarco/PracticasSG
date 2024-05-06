@@ -17,7 +17,8 @@ class MyTubo extends THREE.Object3D {
     var materialTubo = new THREE.MeshNormalMaterial();
 
     var meshTubo = new THREE.Mesh(geometriaTubo, materialTubo);
-    meshTubo.rotateX(90*(Math.PI/180));
+    //meshTubo.rotateX(90*(Math.PI/180));
+    
     this.add(meshTubo);
   }
 
@@ -26,32 +27,43 @@ class MyTubo extends THREE.Object3D {
   }
   
 
-  crearCamino(radio){
-
+  crearCamino(radio) {
     var pts = [];
+  
+    // Creamos los puntos sin rotar
     for (let i = 0; i < 18; i++) {
-        const ang = (i / 20) * Math.PI * 2;
-        const x = radio * Math.cos(ang);
-        const y = radio * Math.sin(ang);
-        const punto = new THREE.Vector3(x, y, 0);
-        pts.push(punto);
+      const ang = (i / 20) * Math.PI * 2;
+      const x = radio * Math.cos(ang);
+      const y = radio * Math.sin(ang);
+      const punto = new THREE.Vector3(x, y, 0);
+      pts.push(punto);
     }
   
+    // Rotamos cada punto y lo agregamos a la lista
+    for (let i = 0; i < pts.length; i++) {
+      pts[i].applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+    }
+  
+    // Creamos el punto adicional para el recorrido del coche
     var recta = pts[pts.length - 1].clone();
     recta.x += 15;
     pts.push(recta);
-
+  
+    // Rotamos el punto adicional
+    recta.applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+  
+    // Creamos los puntos adicionales del tubo
     for (let i = 0; i < 18; i++) {
       const ang = (i / 20) * Math.PI * 2;
       const x = radio * Math.cos(ang) + 15;
-      const y = radio * Math.sin(ang) ;
+      const y = radio * Math.sin(ang);
       const punto = new THREE.Vector3(x, y, 15);
       pts.push(punto);
-  }
-
+    }
+  
     return pts;
-
-  } 
+  }
+   
   
   createGUI (gui,titleGui) {
     // Controles para el tamaño, la orientación y la posición de la caja

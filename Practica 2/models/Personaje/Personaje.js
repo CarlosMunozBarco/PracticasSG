@@ -15,10 +15,14 @@ class Personaje extends THREE.Object3D {
     materialLoader.load ('../../models/Personaje/Formula_1_mesh.mtl', (materials) => {
       objetoLoader.setMaterials(materials);
       objetoLoader.load('../../models/Personaje/Formula_1_mesh.obj', (object) => {
+        object.rotation.y = Math.PI/2;
+        object.position.y = 2;
         object.scale.set(0.007,0.007,0.007);
         this.add(object);
       }, null , null);
     });
+
+    
   }
 
   
