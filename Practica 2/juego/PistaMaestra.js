@@ -1,6 +1,8 @@
 import * as THREE from '../libs/three.module.js'
 import { MyTubo } from  '../models/Tubo/MyTubo.js'
 import { Personaje } from  '../models/Personaje/Personaje.js'
+import { Bomba } from  '../models/Bomba/Bomba.js'
+import { Tuerca } from  '../models/Tuerca/Tuerca.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
@@ -11,25 +13,18 @@ class PistaMaestra extends THREE.Object3D {
     //Comprobando que funciona
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui,titleGui);
-    const radio = 10;
+    const radio = 15;
     
+    /*****************************TUBO*************************************/
     //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
     var tubo = new MyTubo(radio);
     this.add(tubo);
-    
+    /**********************************************************************/
+
+    /*****************************PERSONAJE************************************/
     var personaje = new Personaje(gui, titleGui);
     personaje.name = 'Personaje';
     this.add(personaje);
-    
-
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    personaje.add(this.camera);
-    this.camera.position.set(-0.5, 3, 0);
-    var puntoDeMiraRelativo = new THREE.Vector3(0, -1, 0.5);
-    var target = new THREE.Vector3();
-    this.camera.getWorldPosition(target);
-    target.add(puntoDeMiraRelativo);
-    this.camera.lookAt(target);
 
     var pts = tubo.obtenerPuntos(radio);
     this.spline = new THREE.CatmullRomCurve3(pts);
@@ -38,9 +33,9 @@ class PistaMaestra extends THREE.Object3D {
 
     var origen = {t : 0};
     var fin = {t : 1};
-    var tiempoDeRecorrido = 20000;
+    var tiempoDeRecorridoCoche = 20000;
 
-    var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(()=> {
+    var animacionPersonaje = new Tween.Tween(origen).to(fin, tiempoDeRecorridoCoche).onUpdate(()=> {
       var posicion = this.spline.getPointAt(origen.t);
       personaje.position.copy(posicion);
       var tangente = this.spline.getTangentAt(origen.t);
@@ -49,13 +44,95 @@ class PistaMaestra extends THREE.Object3D {
       personaje.lookAt(posicion);
     })
 
-    animacion.start();
+    animacionPersonaje.start();
+
+    /****************************************************************************/
+
+
+    /******************************BOMBA*****************************************/
+      var bomba = new Bomba(gui, titleGui);
+      this.add(bomba);
+      bomba.position.z += 3*radio;
+      bomba.scale.set(0.5, 0.5, 0.5);
+
+      var ptsBomba = this.recorridoVolador(bomba);
+      this.splineBomba = new THREE.CatmullRomCurve3(ptsBomba);
+      this.binormalesBomba = this.splineBomba.computeFrenetFrames(this.segmentos, true).binormals;
+
+      var origen = {t : 0};
+      var fin = {t : 1};
+      var tiempoDeRecorridoBomba = 10000;
+
+      var animacionBomba = new Tween.Tween(origen).to(fin, tiempoDeRecorridoBomba).onUpdate(()=> {
+        var posicion = this.splineBomba.getPointAt(origen.t);
+        bomba.position.copy(posicion);
+        var tangente = this.splineBomba.getTangentAt(origen.t);
+        posicion.add(tangente);
+        bomba.up = this.binormalesBomba[Math.floor(origen.t * this.segmentos)];
+        bomba.lookAt(posicion);
+    })
+
+    animacionBomba.start();
+    /****************************************************************************/
+
+    /******************************TUERCA*****************************************/
+    var tuerca = new Tuerca(gui, titleGui);
+    this.add(tuerca);
+    tuerca.position.z += 3*radio;
+    tuerca.position.x -=3;
+
+    var ptsTuerca = this.invertirVector(this.recorridoVolador(tuerca));
+    this.splineTuerca = new THREE.CatmullRomCurve3(ptsTuerca);
+    this.binormalesTuerca = this.splineTuerca.computeFrenetFrames(this.segmentos, true).binormals;
+
+    var origen = {t : 1};
+    var fin = {t : 0};
+    var tiempoDeRecorridoTuerca = 10000;
+
+    var animacionTuerca = new Tween.Tween(origen).to(fin, tiempoDeRecorridoTuerca).onUpdate(()=> {
+      var posicion = this.splineTuerca.getPointAt(origen.t);
+      tuerca.position.copy(posicion);
+      var tangente = this.splineTuerca.getTangentAt(origen.t);
+      posicion.add(tangente);
+      tuerca.up = this.binormalesTuerca[Math.floor(origen.t * this.segmentos)];
+      tuerca.lookAt(posicion);
+    })
+
+  animacionTuerca.start();
+  /****************************************************************************/
+  }
+
+  invertirVector(vector) {
+    // Creamos un nuevo vector para almacenar el resultado
+    var vectorInvertido = [];
+
+    // Iteramos sobre el vector original en orden inverso
+    for (var i = vector.length - 1; i >= 0; i--) {
+        // Añadimos cada componente al nuevo vector invertido
+        vectorInvertido.push(vector[i]);
+    }
+
+    return vectorInvertido;
   }
 
   getCamera(){
     return this.camera;
   }
   
+  recorridoVolador(objeto) {
+    // Definimos los puntos de la trayectoria
+    const puntos = [
+        new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z), // Punto inicial
+        new THREE.Vector3(objeto.position.x, objeto.position.y+5, objeto.position.z), 
+        new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z), 
+        new THREE.Vector3(objeto.position.x, objeto.position.y-5, objeto.position.z), 
+        new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z) // Punto final (de vuelta al inicio)
+    ];
+
+    // Devolvemos los puntos
+    return puntos;
+}
+
   createGUI (gui,titleGui) {
     // Controles para el tamaño, la orientación y la posición de la caja
     this.guiControls = {
