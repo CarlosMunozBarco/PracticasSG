@@ -17,7 +17,6 @@ class MyTubo extends THREE.Object3D {
     var materialTubo = new THREE.MeshNormalMaterial();
 
     var meshTubo = new THREE.Mesh(geometriaTubo, materialTubo);
-    //meshTubo.rotateX(90*(Math.PI/180));
     
     this.add(meshTubo);
   }
@@ -28,42 +27,31 @@ class MyTubo extends THREE.Object3D {
   
 
   crearCamino(radio) {
-    var pts = [];
-  
-    // Creamos los puntos sin rotar
-    for (let i = 0; i < 18; i++) {
-      const ang = (i / 20) * Math.PI * 2;
-      const x = radio * Math.cos(ang);
-      const y = radio * Math.sin(ang);
-      const punto = new THREE.Vector3(x, y, 0);
-      pts.push(punto);
-    }
-  
-    // Rotamos cada punto y lo agregamos a la lista
-    for (let i = 0; i < pts.length; i++) {
-      pts[i].applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
-    }
-  
-    // Creamos el punto adicional para el recorrido del coche
-    var recta = pts[pts.length - 1].clone();
-    recta.x += 15;
-    pts.push(recta);
-  
-    // Rotamos el punto adicional
-    recta.applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
-  
-    // Creamos los puntos adicionales del tubo
-    for (let i = 0; i < 18; i++) {
-      const ang = (i / 20) * Math.PI * 2;
-      const x = radio * Math.cos(ang) + 15;
-      const y = radio * Math.sin(ang);
-      const punto = new THREE.Vector3(x, y, 15);
-      pts.push(punto);
-    }
-  
-    return pts;
-  }
-   
+    const shape = new THREE.Shape();
+    shape.moveTo(-radio,radio);
+    shape.quadraticCurveTo(0, 0, radio, radio);
+    shape.lineTo(radio*3, radio);
+    shape.lineTo(radio*3, radio*2);
+    shape.lineTo(radio, radio*2);
+    shape.quadraticCurveTo(0, 3*radio, -radio, 2*radio);
+    shape.lineTo(-radio*3, radio*2);
+    shape.lineTo(-radio*3, radio);
+    shape.lineTo(-radio, radio);
+    
+
+    // Extracción de los puntos del Shape
+    const puntosExtruidos = shape.getPoints();
+    const puntos = puntosExtruidos.map(punto => new THREE.Vector3(punto.x, 0, punto.y)); // Mantener los puntos en el plano xz
+
+    return puntos;
+}
+
+
+
+
+
+
+
   
   createGUI (gui,titleGui) {
     // Controles para el tamaño, la orientación y la posición de la caja

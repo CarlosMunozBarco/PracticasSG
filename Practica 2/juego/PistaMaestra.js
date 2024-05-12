@@ -11,9 +11,10 @@ class PistaMaestra extends THREE.Object3D {
     //Comprobando que funciona
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui,titleGui);
+    const radio = 10;
     
     //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
-    var tubo = new MyTubo(10);
+    var tubo = new MyTubo(radio);
     this.add(tubo);
     
     var personaje = new Personaje(gui, titleGui);
@@ -30,7 +31,7 @@ class PistaMaestra extends THREE.Object3D {
     target.add(puntoDeMiraRelativo);
     this.camera.lookAt(target);
 
-    var pts = tubo.obtenerPuntos(10);
+    var pts = tubo.obtenerPuntos(radio);
     this.spline = new THREE.CatmullRomCurve3(pts);
     this.segmentos = 100;
     this.binormales = this.spline.computeFrenetFrames(this.segmentos, true).binormals;
