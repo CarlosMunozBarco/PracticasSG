@@ -17,18 +17,19 @@ class PistaMaestra extends THREE.Object3D {
     this.add(tubo);
     
     var personaje = new Personaje(gui, titleGui);
+    personaje.name = 'Personaje';
+    this.add(personaje);
     
 
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    personaje.add(camera);
-    camera.position.set(-0.5, 3, 0);
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    personaje.add(this.camera);
+    this.camera.position.set(-0.5, 3, 0);
     var puntoDeMiraRelativo = new THREE.Vector3(0, -1, 0.5);
     var target = new THREE.Vector3();
-    camera.getWorldPosition(target);
+    this.camera.getWorldPosition(target);
     target.add(puntoDeMiraRelativo);
-    camera.lookAt(target);
-    this.add(personaje);
-    //personaje.scale.set(2,2,2);
+    this.camera.lookAt(target);
+
     var pts = tubo.obtenerPuntos(10);
     this.spline = new THREE.CatmullRomCurve3(pts);
     this.segmentos = 100;
@@ -48,9 +49,10 @@ class PistaMaestra extends THREE.Object3D {
     })
 
     animacion.start();
+  }
 
-
-    
+  getCamera(){
+    return this.camera;
   }
   
   createGUI (gui,titleGui) {
