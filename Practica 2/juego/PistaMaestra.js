@@ -22,9 +22,15 @@ class PistaMaestra extends THREE.Object3D {
     /**********************************************************************/
 
     /*****************************PERSONAJE************************************/
-    var personaje = new Personaje(gui, titleGui);
-    personaje.name = 'Personaje';
-    this.add(personaje);
+    this.personaje = new Personaje(gui, titleGui);
+    this.personaje.name = 'Personaje';
+    this.add(this.personaje);
+
+    this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera.position.set(0, 2, 0);
+
+    this.personaje.add(this.camera);
+
 
     var pts = tubo.obtenerPuntos(radio);
     this.spline = new THREE.CatmullRomCurve3(pts);
@@ -33,18 +39,17 @@ class PistaMaestra extends THREE.Object3D {
 
     var origen = {t : 0};
     var fin = {t : 1};
-    var tiempoDeRecorridoCoche = 20000;
+    var tiempoDeRecorrido = 30000;
 
-    var animacionPersonaje = new Tween.Tween(origen).to(fin, tiempoDeRecorridoCoche).onUpdate(()=> {
-      var posicion = this.spline.getPointAt(origen.t);
-      personaje.position.copy(posicion);
-      var tangente = this.spline.getTangentAt(origen.t);
-      posicion.add(tangente);
-      personaje.up = this.binormales[Math.floor(origen.t * this.segmentos)];
-      personaje.lookAt(posicion);
-    })
+    var animacion = this.crearAnimacion(origen, fin, tiempoDeRecorrido);
+    animacion.start();
+    animacion.repeat(Infinity);
 
-    animacionPersonaje.start();
+    // Variable para controlar la rotación manual durante la animación
+    this.manualRotationAngle = 0;
+
+    // Agregar event listener para el teclado
+    document.addEventListener('keydown', this.onKeyDown.bind(this), false);
 
     /****************************************************************************/
 
@@ -102,6 +107,58 @@ class PistaMaestra extends THREE.Object3D {
   /****************************************************************************/
   }
 
+  onKeyDown(event) {
+    switch(event.key) {
+      case 'a':
+        this.manualRotationAngle += -Math.PI / 8; // Angulo de rotación hacia la izquierda
+        break;
+      case 'd':
+        this.manualRotationAngle += +Math.PI / 8; // Angulo de rotación hacia la derecha
+        break;
+      default:
+        break;
+    }
+  }
+
+
+  crearAnimacion(origen, fin, tiempoDeRecorrido){
+    var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(()=> {
+      var posicion = this.spline.getPointAt(origen.t);
+      var tangente = this.spline.getTangentAt(origen.t);
+    
+      // Mover al personaje principal
+      this.personaje.position.copy(posicion);
+      this.personaje.lookAt(this.spline.getPointAt((origen.t + 0.01))); // Mirar ligeramente hacia adelante
+
+
+      var distanciaDetras = -4; // Reducir la distancia detrás del personaje para acercar la cámara
+      var alturaCamara = 3; // Altura deseada de la cámara por encima del personaje
+      // Calcular la posición de la cámara
+      var camPos = posicion.clone().add(tangente.clone().multiplyScalar(distanciaDetras));
+      
+      // Establecer la posición de la cámara
+      this.camera.position.copy(camPos);
+      this.camera.position.y = posicion.y + alturaCamara; // Ajustar la altura de la cámara
+  
+      // Hacer que la cámara mire hacia donde está mirando el personaje principal
+      this.camera.lookAt(this.personaje.position);
+
+      // Rotar el personaje principal manualmente
+      this.personaje.rotateZ(this.manualRotationAngle);
+    })
+
+    return animacion;
+  }
+
+  getCamera(){
+    return this.camera;
+  }
+
+  getTarget(){
+    return this.personaje.position;
+  }
+  
+
   invertirVector(vector) {
     // Creamos un nuevo vector para almacenar el resultado
     var vectorInvertido = [];
@@ -134,68 +191,9 @@ class PistaMaestra extends THREE.Object3D {
 }
 
   createGUI (gui,titleGui) {
-    // Controles para el tamaño, la orientación y la posición de la caja
-    this.guiControls = {
-      sizeX : 1.0,
-      sizeY : 1.0,
-      sizeZ : 1.0,
-      
-      rotX : 0.0,
-      rotY : 0.0,
-      rotZ : 0.0,
-      
-      posX : 0.0,
-      posY : 0.0,
-      posZ : 0.0,
-      
-      // Un botón para dejarlo todo en su posición inicial
-      // Cuando se pulse se ejecutará esta función.
-      reset : () => {
-        this.guiControls.sizeX = 1.0;
-        this.guiControls.sizeY = 1.0;
-        this.guiControls.sizeZ = 1.0;
-        
-        this.guiControls.rotX = 0.0;
-        this.guiControls.rotY = 0.0;
-        this.guiControls.rotZ = 0.0;
-        
-        this.guiControls.posX = 0.0;
-        this.guiControls.posY = 0.0;
-        this.guiControls.posZ = 0.0;
-      }
-    } 
-    
-    // Se crea una sección para los controles de la caja
-    var folder = gui.addFolder (titleGui);
-    // Estas lineas son las que añaden los componentes de la interfaz
-    // Las tres cifras indican un valor mínimo, un máximo y el incremento
-    // El método   listen()   permite que si se cambia el valor de la variable en código, el deslizador de la interfaz se actualice
-    folder.add (this.guiControls, 'sizeX', 0.1, 5.0, 0.01).name ('Tamaño X : ').listen();
-    folder.add (this.guiControls, 'sizeY', 0.1, 5.0, 0.01).name ('Tamaño Y : ').listen();
-    folder.add (this.guiControls, 'sizeZ', 0.1, 5.0, 0.01).name ('Tamaño Z : ').listen();
-    
-    folder.add (this.guiControls, 'rotX', 0.0, Math.PI/2, 0.01).name ('Rotación X : ').listen();
-    folder.add (this.guiControls, 'rotY', 0.0, Math.PI/2, 0.01).name ('Rotación Y : ').listen();
-    folder.add (this.guiControls, 'rotZ', 0.0, Math.PI/2, 0.01).name ('Rotación Z : ').listen();
-    
-    folder.add (this.guiControls, 'posX', -20.0, 20.0, 0.01).name ('Posición X : ').listen();
-    folder.add (this.guiControls, 'posY', 0.0, 10.0, 0.01).name ('Posición Y : ').listen();
-    folder.add (this.guiControls, 'posZ', -20.0, 20.0, 0.01).name ('Posición Z : ').listen();
-    
-    folder.add (this.guiControls, 'reset').name ('[ Reset ]');
   }
   
   update () {
-    // Con independencia de cómo se escriban las 3 siguientes líneas, el orden en el que se aplican las transformaciones es:
-    // Primero, el escalado
-    // Segundo, la rotación en Z
-    // Después, la rotación en Y
-    // Luego, la rotación en X
-    // Y por último la traslación
-    
-    this.position.set (this.guiControls.posX,this.guiControls.posY,this.guiControls.posZ);
-    this.rotation.set (this.guiControls.rotX,this.guiControls.rotY,this.guiControls.rotZ);
-    this.scale.set (this.guiControls.sizeX,this.guiControls.sizeY,this.guiControls.sizeZ);
     Tween.update();
   }
 }

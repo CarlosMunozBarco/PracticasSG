@@ -35,7 +35,7 @@ class MyScene extends THREE.Scene {
     this.createLights ();
     
     // Tendremos una cámara con un control de movimiento con el ratón
-    this.createCamera ();
+  
     
     
     // Y unos ejes. Imprescindibles para orientarnos sobre dónde están las cosas
@@ -48,8 +48,10 @@ class MyScene extends THREE.Scene {
     // El modelo puede incluir su parte de la interfaz gráfica de usuario. Le pasamos la referencia a 
     // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
     this.model = new PistaMaestra(this.gui, "Controles de la Caja");
-    
+    this.createCamera ();
     this.add (this.model);
+    
+  
   }
   
   initStats() {
@@ -69,18 +71,20 @@ class MyScene extends THREE.Scene {
   }
   
   createCamera () {
-    // Para crear una cámara le indicamos
-    //   El ángulo del campo de visión en grados sexagesimales
-    //   La razón de aspecto ancho/alto
-    //   Los planos de recorte cercano y lejano
-    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
-    // Recuerda: Todas las unidades están en metros
-    // También se indica dónde se coloca
-    this.camera.position.set (4, 2, 4);
-    // Y hacia dónde mira
-    var look = new THREE.Vector3 (0,0,0);
-    this.camera.lookAt(look);
+    // // Para crear una cámara le indicamos
+    // //   El ángulo del campo de visión en grados sexagesimales
+    // //   La razón de aspecto ancho/alto
+    // //   Los planos de recorte cercano y lejano
+    // this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
+    // // Recuerda: Todas las unidades están en metros
+    // // También se indica dónde se coloca
+    // this.camera.position.set (4, 2, 4);
+    // // Y hacia dónde mira
+    // var look = new THREE.Vector3 (0,0,0);
+    this.camera = this.model.getCamera();
+    this.camera.lookAt(this.model.getTarget());
     this.add (this.camera);
+
     
     // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
@@ -89,7 +93,7 @@ class MyScene extends THREE.Scene {
     this.cameraControl.zoomSpeed = -2;
     this.cameraControl.panSpeed = 0.5;
     // Debe orbitar con respecto al punto de mira de la cámara
-    this.cameraControl.target = look;
+    this.cameraControl.target = this.model.getTarget();
   }
   
   createGround () {
