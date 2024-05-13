@@ -3,6 +3,7 @@ import { MyTubo } from  '../models/Tubo/MyTubo.js'
 import { Personaje } from  '../models/Personaje/Personaje.js'
 import { Bomba } from  '../models/Bomba/Bomba.js'
 import { Tuerca } from  '../models/Tuerca/Tuerca.js'
+import { Bidon } from '../models/Bidon/Bidon.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
@@ -15,7 +16,9 @@ class PistaMaestra extends THREE.Object3D {
     this.createGUI(gui,titleGui);
     const radio = 15;
     this.segmentos = 100;
+
     
+
     /*****************************TUBO*************************************/
     //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
     var tubo = new MyTubo(radio);
@@ -76,6 +79,21 @@ class PistaMaestra extends THREE.Object3D {
 
     animacionTuerca.start();
   /****************************************************************************/
+
+  /******************************BIDON*****************************************/
+    this.bidon = new Bidon(gui, titleGui);
+    this.add(this.bidon);
+    this.bidon.position.z += radio + 0.05;
+    this.bidon.position.y += 2;
+    this.bidon.position.x += radio;
+    
+  /****************************************************************************/
+
+  /*************************COLISIONES***********************************/
+    this.cajaPersonaje = new THREE.Box3();
+    this.cajaBidon = new THREE.Box3();
+
+  /**********************************************************************/
   }
 
   onKeyDown(event) {
@@ -126,8 +144,8 @@ class PistaMaestra extends THREE.Object3D {
     
       // Mover al personaje principal
       this.personaje.position.copy(posicion);
-      if(origen.t < 0.99){
-        this.personaje.lookAt(spline.getPointAt((origen.t + 0.01))); // Mirar ligeramente hacia adelante
+      if(origen.t < 0.9999){
+        this.personaje.lookAt(spline.getPointAt((origen.t + 0.0001))); // Mirar ligeramente hacia adelante
       }
       
 
@@ -195,7 +213,15 @@ class PistaMaestra extends THREE.Object3D {
   }
   
   update () {
+
+    this.cajaBidon.setFromObject(this.bidon);
+    this.cajaPersonaje.setFromObject(this.personaje);
+    if(this.cajaPersonaje.intersectsBox(this.cajaBidon)){
+      this.remove(this.bidon);
+    }
+
     Tween.update();
+    
   }
 }
 

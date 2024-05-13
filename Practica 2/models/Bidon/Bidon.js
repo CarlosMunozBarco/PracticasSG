@@ -15,15 +15,15 @@ class Bidon extends THREE.Object3D {
     material.flatShading = true;             // Se le aplica flatShading para que se vean las caras planas.
     material.needsUpdate = false;            // Se fuerza a que se actualice en el renderizado.     
 
-    var cilindext = new THREE.CylinderGeometry(0.6,0.6,1.7,32,32);
+    var cilindext = new THREE.CylinderGeometry(0.6,0.6,1.7,16,16);
     var cilindextMesh = new THREE.Mesh(cilindext,material);
     cilindextMesh.position.y = 0.85;
 
-    var cilindint = new THREE.CylinderGeometry(0.55,0.55,1.8,32,32);
+    var cilindint = new THREE.CylinderGeometry(0.55,0.55,1.8,16,16);
     var cilindintMesh = new THREE.Mesh(cilindint,material);
     cilindintMesh.position.y = 0.95;
 
-    var toro1 = new THREE.TorusGeometry(0.61,0.01,32,32);
+    var toro1 = new THREE.TorusGeometry(0.61,0.01,16,16);
     var toro1Mesh = new THREE.Mesh(toro1,material);
     toro1Mesh.rotateX(Math.PI/2);
 
@@ -32,7 +32,7 @@ class Bidon extends THREE.Object3D {
     boxMesh.position.y = 1;
     boxMesh.position.x = 0.3;
 
-    var cilindaux = new THREE.CylinderGeometry(0.6,0.6,0.1,64,64);
+    var cilindaux = new THREE.CylinderGeometry(0.6,0.6,0.1,16,16);
     var cilindauxMesh = new THREE.Mesh(cilindaux,material);
 
     var aux = new CSG();
