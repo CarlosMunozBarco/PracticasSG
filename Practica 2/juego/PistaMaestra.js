@@ -89,7 +89,7 @@ class PistaMaestra extends THREE.Object3D {
   /******************************BIDON*****************************************/
     this.bidon = new Bidon(gui, titleGui);
     this.add(this.bidon);
-    this.bidon.position.z += radio + 0.05;
+    this.bidon.position.z += 2*radio + 0.05;
     this.bidon.position.y += 2;
     this.bidon.position.x += radio;
     this.bidonActivo = true;
@@ -99,9 +99,9 @@ class PistaMaestra extends THREE.Object3D {
   /******************************TROFEO*****************************************/
   this.trofeo = new Trofeo(gui, titleGui);
   this.add(this.trofeo);
-  this.trofeo.position.z += 2*radio + 0.05;
+  this.trofeo.position.z += radio - 1;
   this.trofeo.position.y += 2;
-  this.trofeo.position.x += radio;
+  this.trofeo.position.x += 2*radio;
   this.trofeoActivo = true;
   
 /****************************************************************************/
@@ -292,9 +292,7 @@ crearAnimacion(splinePersonaje) {
     gui.add(this.scoreDisplay, 'score').name('Puntuación').listen();
   }
   
-  update () {
-    Tween.update();
-
+  gestionarColisiones(){
     this.cajaBidon.setFromObject(this.bidon);
     this.cajaPersonaje.setFromObject(this.personaje);
     this.cajaTrofeo.setFromObject(this.trofeo);
@@ -317,6 +315,11 @@ crearAnimacion(splinePersonaje) {
       this.score += 10;
       this.updateScoreDisplay(this.score);
     }
+  }
+  update () {
+    Tween.update();
+    this.gestionarColisiones();
+    
 
     
     
