@@ -130,44 +130,55 @@ class PistaMaestra extends THREE.Object3D {
 
 }
 
-  crearAnimacion(splinePersonaje){
+crearAnimacion(splinePersonaje) {
+  var origen = { t: 0 };
+  var fin = { t: 1 };
+  var tiempoDeRecorrido = 30000;
+  var spline = splinePersonaje.clone();
 
-    var origen = {t : 0};
-    var fin = {t : 1};
-    var tiempoDeRecorrido = 30000;
-    var spline = splinePersonaje.clone();
-
-    var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(()=> {
+  var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(() => {
       var posicion = spline.getPointAt(origen.t);
       var tangente = spline.getTangentAt(origen.t);
       origen.t = THREE.MathUtils.clamp(origen.t, 0, 1);
-    
+
       // Mover al personaje principal
       this.personaje.position.copy(posicion);
-      if(origen.t < 0.9999){
-        this.personaje.lookAt(spline.getPointAt((origen.t + 0.0001))); // Mirar ligeramente hacia adelante
+      if (origen.t < 0.9999) {
+          this.personaje.lookAt(spline.getPointAt((origen.t + 0.0001))); // Mirar ligeramente hacia adelante
       }
-      
-
 
       var distanciaDetras = -4; // Reducir la distancia detrás del personaje para acercar la cámara
-      var alturaCamara = 3; // Altura deseada de la cámara por encima del personaje
-      // Calcular la posición de la cámara
-      var camPos = posicion.clone().add(tangente.clone().multiplyScalar(distanciaDetras));
-      
+      var alturaCamara = 3.5; // Altura deseada de la cámara por encima del personaje
+
+      // Calcular la posición de la cámara relativa al personaje
+      var relativeCamPos = new THREE.Vector3(0, alturaCamara, distanciaDetras);
+      relativeCamPos.applyQuaternion(this.personaje.quaternion); // Aplicar la rotación del personaje a la posición relativa
+
+      // Aplicar la posición relativa al personaje
+      var camPos = posicion.clone().add(relativeCamPos);
+
       // Establecer la posición de la cámara
       this.camera.position.copy(camPos);
-      this.camera.position.y = posicion.y + alturaCamara; // Ajustar la altura de la cámara
-  
-      // Hacer que la cámara mire hacia donde está mirando el personaje principal
-      this.camera.lookAt(this.personaje.position);
+
+      
 
       // Rotar el personaje principal manualmente
       this.personaje.rotateZ(this.manualRotationAngle);
-    })
 
-    return animacion.repeat(Infinity);
-  }
+      // Recalcular la posición relativa de la cámara después de rotar el personaje
+      relativeCamPos = new THREE.Vector3(0, alturaCamara, distanciaDetras);
+      relativeCamPos.applyQuaternion(this.personaje.quaternion); // Aplicar la rotación del personaje a la posición relativa
+      camPos = posicion.clone().add(relativeCamPos);
+      this.camera.position.copy(camPos);
+
+      // Hacer que la cámara mire hacia el personaje
+      this.camera.lookAt(this.personaje.position);
+  });
+
+  return animacion.repeat(Infinity);
+}
+
+
 
   getCamera(){
     return this.camera;
