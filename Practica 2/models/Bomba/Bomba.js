@@ -3,13 +3,16 @@ import { CSG } from '../../libs/CSG-v2.js'
 
  
 class Bomba extends THREE.Object3D {
-  constructor(gui,titleGui) {
+  constructor(gui, titleGui) {
     super();
     
     // Se crea la parte de la interfaz que corresponde a la caja
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
-    this.createGUI(gui,titleGui);
-    
+    this.createGUI(gui, titleGui);
+
+    // Establece el userData del objeto Bomba
+    this.userData.tipo = "bomba";
+
     // Definición del material.
     var material = new THREE.MeshNormalMaterial();  
 
@@ -29,19 +32,15 @@ class Bomba extends THREE.Object3D {
     csg.union([esferaMesh, cilindroMMesh]);
     csg.union([cilindroPMesh]);
 
-
-
-
-
     var mesh = csg.toMesh(material);
 
     mesh.rotateZ(Math.PI/2);
     this.add(mesh);
+}
 
+  recibeClick() {
+    console.log("Bomba ha sido clickeada");
   }
-
-
-
   
   createGUI (gui,titleGui) {
   }
