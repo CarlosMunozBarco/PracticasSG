@@ -4,6 +4,7 @@ import { Personaje } from  '../models/Personaje/Personaje.js'
 import { Bomba } from  '../models/Bomba/Bomba.js'
 import { Tuerca } from  '../models/Tuerca/Tuerca.js'
 import { Bidon } from '../models/Bidon/Bidon.js'
+import { Trofeo } from '../models/Trofeo/Trofeo.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
@@ -89,13 +90,24 @@ class PistaMaestra extends THREE.Object3D {
     this.bidon.position.z += radio + 0.05;
     this.bidon.position.y += 2;
     this.bidon.position.x += radio;
+    this.bidonActivo = true;
     
   /****************************************************************************/
+
+  /******************************TROFEO*****************************************/
+  this.trofeo = new Trofeo(gui, titleGui);
+  this.add(this.trofeo);
+  this.trofeo.position.z += 2*radio + 0.05;
+  this.trofeo.position.y += 2;
+  this.trofeo.position.x += radio;
+  this.trofeoActivo = true;
+  
+/****************************************************************************/
 
   /*************************COLISIONES***********************************/
     this.cajaPersonaje = new THREE.Box3();
     this.cajaBidon = new THREE.Box3();
-
+    this.cajaTrofeo = new THREE.Box3();
   /**********************************************************************/
   }
 
@@ -192,9 +204,7 @@ crearAnimacion(splinePersonaje) {
 
   var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(() => {
       var posicion = spline.getPointAt(origen.t);
-      var tangente = spline.getTangentAt(origen.t);
-      origen.t = THREE.MathUtils.clamp(origen.t, 0, 1);
-
+      
       // Mover al personaje principal
       this.personaje.position.copy(posicion);
       if (origen.t < 0.9999) {
@@ -281,14 +291,32 @@ crearAnimacion(splinePersonaje) {
   }
   
   update () {
+    Tween.update();
 
     this.cajaBidon.setFromObject(this.bidon);
     this.cajaPersonaje.setFromObject(this.personaje);
-    if(this.cajaPersonaje.intersectsBox(this.cajaBidon)){
+    this.cajaTrofeo.setFromObject(this.trofeo);
+    
+    if(this.cajaPersonaje.intersectsBox(this.cajaBidon) && this.bidonActivo == true){
+      this.remove(this.cajaBidon);
       this.remove(this.bidon);
+      this.bidonActivo = false;
+      this.score -= 10;
+      if(this.score < 0){
+        this.score = 0;
+      }
+      this.updateScoreDisplay(this.score);
     }
 
-    Tween.update();
+    if(this.cajaPersonaje.intersectsBox(this.cajaTrofeo) && this.trofeoActivo == true){
+      this.remove(this.cajaTrofeo);
+      this.remove(this.trofeo);
+      this.trofeoActivo = false;
+      this.score += 10;
+      this.updateScoreDisplay(this.score);
+    }
+
+    
     
   }
 }
