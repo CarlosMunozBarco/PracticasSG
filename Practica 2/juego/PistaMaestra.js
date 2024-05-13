@@ -48,8 +48,9 @@ class PistaMaestra extends THREE.Object3D {
 
     // Agregar event listener para el teclado
     document.addEventListener('keydown', this.onKeyDown.bind(this), false);
-          // Agregar event listener para el clic del ratón
-          document.addEventListener('click', this.onMouseClick.bind(this), false);
+    // Agregar event listener para el clic del ratón
+    document.addEventListener('click', this.onMouseClick.bind(this), false);
+    this.score = 0;
 
     /****************************************************************************/
 
@@ -98,48 +99,50 @@ class PistaMaestra extends THREE.Object3D {
   /**********************************************************************/
   }
 
-  // Implementa el método onMouseClick
-  onMouseClick(event) {
-    console.log("Se ha hecho clic en la escena."); // Punto de control para verificar si se ha activado el evento del ratón
+// Implementa el método onMouseClick
+onMouseClick(event) {
+  console.log("Se ha hecho clic en la escena."); // Punto de control para verificar si se ha activado el evento del ratón
 
-    // Obtiene las coordenadas del clic del ratón
-    const mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  // Obtiene las coordenadas del clic del ratón
+  const mouse = new THREE.Vector2();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Define el rayo desde la posición de la cámara a través de las coordenadas del ratón
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, this.camera);
+  // Define el rayo desde la posición de la cámara a través de las coordenadas del ratón
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, this.camera);
 
-    // Calcula las intersecciones entre el rayo y los objetos en la escena
-    const intersects = raycaster.intersectObjects(this.children, true);
+  // Calcula las intersecciones entre el rayo y los objetos en la escena
+  const intersects = raycaster.intersectObjects(this.children, true);
 
-    // Si hay intersecciones, realiza alguna acción
-    if (intersects.length > 0) {
-        console.log("Se ha detectado una intersección."); // Punto de control para verificar si se detecta una intersección
+  // Si hay intersecciones, realiza alguna acción
+  if (intersects.length > 0) {
+      console.log("Se ha detectado una intersección."); // Punto de control para verificar si se detecta una intersección
 
-        // Obtiene el primer objeto intersectado
-        const selectedObject = intersects[0].object;
-        console.log("Objeto seleccionado:", selectedObject);
+      // Obtiene el primer objeto intersectado
+      const selectedObject = intersects[0].object;
 
-        // Imprime el nombre del objeto seleccionado en la consola para depuración
-        console.log("Objeto seleccionado:", selectedObject.userData.tipo);
-        // Aquí puedes implementar la lógica para manejar las intersecciones
-        // Por ejemplo, aumentar o disminuir la puntuación según el tipo de objeto
-        if (selectedObject.userData.tipo === "tuerca") {
-            // Aumenta la puntuación si el objeto es 'Tuerca'
-            console.log("Se ha hecho clic en la tuerca.");
-            this.score += 2;
-        } else if (selectedObject.userData.tipo === "bomba") {
-            // Disminuye la puntuación si el objeto es 'Bomba'
-            console.log("Se ha hecho clic en la bomba.");
-            this.score -= 5;
-        }
+      // Imprime el objeto seleccionado en la consola para depuración
+      console.log("Objeto seleccionado:", selectedObject);
 
-        // Actualiza la visualización de la puntuación en la interfaz gráfica de usuario
-        this.updateScoreDisplay(this.score);
-    }
+      // Verifica el tipo de objeto seleccionado y actualiza la puntuación según corresponda
+      if (selectedObject.userData && selectedObject.userData.tipo === "tuerca") {
+          // Aumenta la puntuación si el objeto es 'Tuerca'
+          console.log("Se ha hecho clic en la tuerca.");
+          this.score += 2;
+      } else if (selectedObject.userData && selectedObject.userData.tipo === "bomba") {
+          // Disminuye la puntuación si el objeto es 'Bomba'
+          console.log("Se ha hecho clic en la bomba.");
+          this.score -= 5;
+          if(this.score < 0){ 
+            this.score = 0;
+          }
+      }
+
+      // Actualiza la visualización de la puntuación en la interfaz gráfica de usuario
+      this.updateScoreDisplay(this.score);
   }
+}
 
   // Implementa el método updateScoreDisplay
   updateScoreDisplay(score) {

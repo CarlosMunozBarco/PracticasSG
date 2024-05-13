@@ -111,10 +111,10 @@ class Tuerca extends THREE.Object3D {
     csg.intersect([hexagonMesh, sphereMesh]);
     csg.subtract([interiorMesh]);
 
-
+    
 
     var mesh = csg.toMesh(material);
-
+    mesh.userData.tipo = "tuerca";
 
   
     this.add(mesh);

@@ -1,7 +1,6 @@
-import * as THREE from '../../libs/three.module.js'
-import { CSG } from '../../libs/CSG-v2.js'
+import * as THREE from '../../libs/three.module.js';
+import { CSG } from '../../libs/CSG-v2.js';
 
- 
 class Bomba extends THREE.Object3D {
   constructor(gui, titleGui) {
     super();
@@ -10,42 +9,42 @@ class Bomba extends THREE.Object3D {
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui, titleGui);
 
-    // Establece el userData del objeto Bomba
-    this.userData.tipo = "bomba";
-
     // Definición del material.
-    var material = new THREE.MeshNormalMaterial();  
+    const material = new THREE.MeshNormalMaterial();  
 
-    var esfera = new THREE.SphereGeometry(3);
-    var esferaMesh = new THREE.Mesh(esfera, material);
+    const esfera = new THREE.SphereGeometry(3);
+    const esferaMesh = new THREE.Mesh(esfera, material);
     
-    var cilindroMediano = new THREE.CylinderGeometry(1.5, 1.5, 1.5);
+    const cilindroMediano = new THREE.CylinderGeometry(1.5, 1.5, 1.5);
     cilindroMediano.translate(0, 3, 0);
-    var cilindroMMesh = new THREE.Mesh(cilindroMediano, material);
+    const cilindroMMesh = new THREE.Mesh(cilindroMediano, material);
 
-    var cilindroPequeno = new THREE.CylinderGeometry(0.25, 0.25, 3);
+    const cilindroPequeno = new THREE.CylinderGeometry(0.25, 0.25, 3);
     cilindroPequeno.rotateZ(-Math.PI/5);
     cilindroPequeno.translate(0.5, 4.5, 0);
-    var cilindroPMesh = new THREE.Mesh(cilindroPequeno, material);
+    const cilindroPMesh = new THREE.Mesh(cilindroPequeno, material);
 
-    var csg = new CSG();
+    const csg = new CSG();
     csg.union([esferaMesh, cilindroMMesh]);
     csg.union([cilindroPMesh]);
 
-    var mesh = csg.toMesh(material);
+    const mesh = csg.toMesh(material);
 
     mesh.rotateZ(Math.PI/2);
+    mesh.userData.tipo = "bomba"; // Asignar userData a la malla
     this.add(mesh);
-}
+  }
 
   recibeClick() {
     console.log("Bomba ha sido clickeada");
   }
   
-  createGUI (gui,titleGui) {
+  createGUI(gui, titleGui) {
+    // Puedes agregar la interfaz gráfica de usuario aquí si es necesario
   }
   
-  update () {
+  update() {
+    // Método de actualización opcional
   }
 }
 
