@@ -15,7 +15,7 @@ class PistaMaestra extends THREE.Object3D {
     //Comprobando que funciona
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui,titleGui);
-    const radio = 15;
+    const radio = 20;
     this.segmentos = 100;
 
     
@@ -59,7 +59,8 @@ class PistaMaestra extends THREE.Object3D {
     /******************************BOMBA*****************************************/
       var bomba = new Bomba(gui, titleGui);
       this.add(bomba);
-      bomba.position.z += 3*radio;
+      bomba.position.z += 3*radio - 10;
+      bomba.position.y += 5;
       bomba.scale.set(0.5, 0.5, 0.5);
 
       var ptsBomba = this.recorridoVolador(bomba);
@@ -74,8 +75,9 @@ class PistaMaestra extends THREE.Object3D {
     /******************************TUERCA*****************************************/
     var tuerca = new Tuerca(gui, titleGui);
     this.add(tuerca);
-    tuerca.position.z += 3*radio;
-    tuerca.position.x -=3;
+    tuerca.position.z += 3*radio - 10;
+    tuerca.position.y += 5;
+    tuerca.position.x -= 3;
 
     var ptsTuerca = this.invertirVector(this.recorridoVolador(tuerca));
     var splineTuerca = new THREE.CatmullRomCurve3(ptsTuerca);
@@ -204,7 +206,7 @@ crearAnimacion(splinePersonaje) {
 
   var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(() => {
       var posicion = spline.getPointAt(origen.t);
-      
+
       // Mover al personaje principal
       this.personaje.position.copy(posicion);
       if (origen.t < 0.9999) {
@@ -274,9 +276,9 @@ crearAnimacion(splinePersonaje) {
     // Definimos los puntos de la trayectoria
     const puntos = [
         new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z), // Punto inicial
-        new THREE.Vector3(objeto.position.x, objeto.position.y+5, objeto.position.z), 
+        new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z +5), 
         new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z), 
-        new THREE.Vector3(objeto.position.x, objeto.position.y-5, objeto.position.z), 
+        new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z -5), 
         new THREE.Vector3(objeto.position.x, objeto.position.y, objeto.position.z) // Punto final (de vuelta al inicio)
     ];
 

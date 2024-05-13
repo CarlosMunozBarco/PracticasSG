@@ -29,16 +29,16 @@ class Trofeo extends THREE.Object3D {
     shape.quadraticCurveTo(0.4,0.8,0.5,1.3);
     shape.lineTo(0,1.3);
     var points = shape.extractPoints().shape;
-    var lathe = new THREE.LatheGeometry(points,32,0,Math.PI*2);
+    var lathe = new THREE.LatheGeometry(points,16,0,Math.PI*2);
     var latheMesh = new THREE.Mesh(lathe,material);
     latheMesh.position.y = 0.5;
 
-    var cilindro = new THREE.CylinderGeometry(0.05,0.05,1.8,32,32);
+    var cilindro = new THREE.CylinderGeometry(0.05,0.05,1.8,16,16);
     var cilindroMesh = new THREE.Mesh(cilindro,material);
     cilindroMesh.rotateX(Math.PI/2);
     cilindroMesh.position.y = 1.7;
 
-    var toro = new THREE.TorusGeometry(0.95,0.05,32,32);
+    var toro = new THREE.TorusGeometry(0.95,0.05,16,16);
     var toroMesh = new THREE.Mesh(toro,material);
     toroMesh.rotateY(Math.PI/2);
     toroMesh.position.y = 2;

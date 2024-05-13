@@ -99,8 +99,8 @@ class MyScene extends THREE.Scene {
   
   createFullViewCamera() {
     // Cámara de vista completa
-    this.fullViewCamera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 50);
-    this.fullViewCamera.position.set(0, 15, 50);
+    this.fullViewCamera = new THREE.PerspectiveCamera(110, window.innerWidth / window.innerHeight, 0.1, 50);
+    this.fullViewCamera.position.set(0, 15, this.model.radio);
     this.fullViewCamera.lookAt(0, 0, 10);
     this.add(this.fullViewCamera);
 }
