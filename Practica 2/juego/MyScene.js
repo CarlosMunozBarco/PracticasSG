@@ -49,7 +49,16 @@ class MyScene extends THREE.Scene {
     // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
     this.model = new PistaMaestra(this.gui, "Controles de la Caja");
     this.createCamera ();
+    this.createFullViewCamera();
     this.add (this.model);
+    this.activeCamera = this.camera;
+
+      // Evento de teclado para cambiar entre cámaras
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'c') { // Tecla 'c' para cambiar entre cámaras
+          this.toggleCamera();
+      }
+    });
     
   
   }
@@ -71,31 +80,41 @@ class MyScene extends THREE.Scene {
   }
   
   createCamera () {
-    // // Para crear una cámara le indicamos
-    // //   El ángulo del campo de visión en grados sexagesimales
-    // //   La razón de aspecto ancho/alto
-    // //   Los planos de recorte cercano y lejano
-    // this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
-    // // Recuerda: Todas las unidades están en metros
-    // // También se indica dónde se coloca
-    // this.camera.position.set (4, 2, 4);
-    // // Y hacia dónde mira
-    // var look = new THREE.Vector3 (0,0,0);
+    // Obtener la cámara del modelo
     this.camera = this.model.getCamera();
     this.camera.lookAt(this.model.getTarget());
     this.add (this.camera);
 
-    
     // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
-    // Se configuran las velocidades de los movimientos
-    this.cameraControl.rotateSpeed = 5;
-    this.cameraControl.zoomSpeed = -2;
-    this.cameraControl.panSpeed = 0.5;
+    
+    // Configuración de las velocidades de los movimientos (establecer en cero para desactivar el control del ratón)
+    this.cameraControl.rotateSpeed = 0; // Velocidad de rotación
+    this.cameraControl.zoomSpeed = 0; // Velocidad de zoom
+    this.cameraControl.panSpeed = 0; // Velocidad de panorámica
+
     // Debe orbitar con respecto al punto de mira de la cámara
     this.cameraControl.target = this.model.getTarget();
-  }
+}
   
+  createFullViewCamera() {
+    // Cámara de vista completa
+    this.fullViewCamera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 50);
+    this.fullViewCamera.position.set(0, 15, 50);
+    this.fullViewCamera.lookAt(0, 0, 10);
+    this.add(this.fullViewCamera);
+}
+
+  toggleCamera() {
+    // Alternar entre la cámara del modelo y la cámara de vista completa
+    if (this.activeCamera === this.camera) {
+        this.activeCamera = this.fullViewCamera;
+    } else {
+        this.activeCamera = this.camera;
+    }
+  }
+
+
   createGround () {
     // El suelo es un Mesh, necesita una geometría y un material.
     
@@ -236,8 +255,8 @@ class MyScene extends THREE.Scene {
     // Se actualiza el resto del modelo
     this.model.update();
     
-    // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
-    this.renderer.render (this, this.getCamera());
+    // Renderizar la escena usando la cámara activa
+    this.renderer.render(this, this.activeCamera);
 
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
     // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
