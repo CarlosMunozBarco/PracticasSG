@@ -14,6 +14,7 @@ class PistaMaestra extends THREE.Object3D {
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui,titleGui);
     const radio = 15;
+    this.segmentos = 100;
     
     /*****************************TUBO*************************************/
     //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
@@ -33,17 +34,11 @@ class PistaMaestra extends THREE.Object3D {
 
 
     var pts = tubo.obtenerPuntos(radio);
-    this.spline = new THREE.CatmullRomCurve3(pts);
-    this.segmentos = 100;
-    this.binormales = this.spline.computeFrenetFrames(this.segmentos, true).binormals;
-
-    var origen = {t : 0};
-    var fin = {t : 1};
-    var tiempoDeRecorrido = 30000;
-
-    var animacion = this.crearAnimacion(origen, fin, tiempoDeRecorrido);
+    var splinePersonaje = new THREE.CatmullRomCurve3(pts);
+    
+    
+    var animacion = this.crearAnimacion(splinePersonaje);
     animacion.start();
-    animacion.repeat(Infinity);
 
     // Variable para controlar la rotación manual durante la animación
     this.manualRotationAngle = 0;
@@ -61,23 +56,12 @@ class PistaMaestra extends THREE.Object3D {
       bomba.scale.set(0.5, 0.5, 0.5);
 
       var ptsBomba = this.recorridoVolador(bomba);
-      this.splineBomba = new THREE.CatmullRomCurve3(ptsBomba);
-      this.binormalesBomba = this.splineBomba.computeFrenetFrames(this.segmentos, true).binormals;
+      var splineBomba = new THREE.CatmullRomCurve3(ptsBomba);
 
-      var origen = {t : 0};
-      var fin = {t : 1};
-      var tiempoDeRecorridoBomba = 10000;
+      var animacionBomba = this.animacionObjeto(bomba, splineBomba);
+      
 
-      var animacionBomba = new Tween.Tween(origen).to(fin, tiempoDeRecorridoBomba).onUpdate(()=> {
-        var posicion = this.splineBomba.getPointAt(origen.t);
-        bomba.position.copy(posicion);
-        var tangente = this.splineBomba.getTangentAt(origen.t);
-        posicion.add(tangente);
-        bomba.up = this.binormalesBomba[Math.floor(origen.t * this.segmentos)];
-        bomba.lookAt(posicion);
-    })
-
-    animacionBomba.start();
+      animacionBomba.start();
     /****************************************************************************/
 
     /******************************TUERCA*****************************************/
@@ -87,23 +71,10 @@ class PistaMaestra extends THREE.Object3D {
     tuerca.position.x -=3;
 
     var ptsTuerca = this.invertirVector(this.recorridoVolador(tuerca));
-    this.splineTuerca = new THREE.CatmullRomCurve3(ptsTuerca);
-    this.binormalesTuerca = this.splineTuerca.computeFrenetFrames(this.segmentos, true).binormals;
+    var splineTuerca = new THREE.CatmullRomCurve3(ptsTuerca);
+    var animacionTuerca = this.animacionObjeto(tuerca, splineTuerca);
 
-    var origen = {t : 1};
-    var fin = {t : 0};
-    var tiempoDeRecorridoTuerca = 10000;
-
-    var animacionTuerca = new Tween.Tween(origen).to(fin, tiempoDeRecorridoTuerca).onUpdate(()=> {
-      var posicion = this.splineTuerca.getPointAt(origen.t);
-      tuerca.position.copy(posicion);
-      var tangente = this.splineTuerca.getTangentAt(origen.t);
-      posicion.add(tangente);
-      tuerca.up = this.binormalesTuerca[Math.floor(origen.t * this.segmentos)];
-      tuerca.lookAt(posicion);
-    })
-
-  animacionTuerca.start();
+    animacionTuerca.start();
   /****************************************************************************/
   }
 
@@ -120,15 +91,45 @@ class PistaMaestra extends THREE.Object3D {
     }
   }
 
+  animacionObjeto(objeto, spline){
 
-  crearAnimacion(origen, fin, tiempoDeRecorrido){
+    var binormales = spline.computeFrenetFrames(this.segmentos, true).binormals;
+
+    var origen = {t : 0};
+    var fin = {t : 1};
+    var tiempoDeRecorridoBomba = 10000;
+
+    var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorridoBomba).onUpdate(()=> {
+      var posicion = spline.getPointAt(origen.t);
+      objeto.position.copy(posicion);
+      var tangente = spline.getTangentAt(origen.t);
+      posicion.add(tangente);
+      objeto.up = binormales[Math.floor(origen.t * this.segmentos)];
+      objeto.lookAt(posicion);
+  })
+
+  return animacion.repeat(Infinity);
+
+}
+
+  crearAnimacion(splinePersonaje){
+
+    var origen = {t : 0};
+    var fin = {t : 1};
+    var tiempoDeRecorrido = 30000;
+    var spline = splinePersonaje.clone();
+
     var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(()=> {
-      var posicion = this.spline.getPointAt(origen.t);
-      var tangente = this.spline.getTangentAt(origen.t);
+      var posicion = spline.getPointAt(origen.t);
+      var tangente = spline.getTangentAt(origen.t);
+      origen.t = THREE.MathUtils.clamp(origen.t, 0, 1);
     
       // Mover al personaje principal
       this.personaje.position.copy(posicion);
-      this.personaje.lookAt(this.spline.getPointAt((origen.t + 0.01))); // Mirar ligeramente hacia adelante
+      if(origen.t < 0.99){
+        this.personaje.lookAt(spline.getPointAt((origen.t + 0.01))); // Mirar ligeramente hacia adelante
+      }
+      
 
 
       var distanciaDetras = -4; // Reducir la distancia detrás del personaje para acercar la cámara
@@ -147,7 +148,7 @@ class PistaMaestra extends THREE.Object3D {
       this.personaje.rotateZ(this.manualRotationAngle);
     })
 
-    return animacion;
+    return animacion.repeat(Infinity);
   }
 
   getCamera(){
