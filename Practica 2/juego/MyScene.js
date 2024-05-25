@@ -3,6 +3,7 @@ import * as THREE from '../libs/three.module.js'
 import { GUI } from '../libs/dat.gui.module.js'
 import { TrackballControls } from '../libs/TrackballControls.js'
 import { Stats } from '../libs/stats.module.js'
+import { Personaje } from '../models/Personaje/Personaje.js'
 
 // Clases de mi proyecto
 import { PistaMaestra } from './PistaMaestra.js'
@@ -27,6 +28,18 @@ class MyScene extends THREE.Scene {
     this.model = new PistaMaestra(this.gui, "Controles de la Caja");
     this.add(this.model);
     
+    //Crear el coche
+    this.personaje = new Personaje(this.gui, "Coche");
+    this.personaje.name = 'Personaje';
+    this.add(this.personaje);
+    this.personaje.rotateZ(Math.PI);
+
+    this.model.establecerPersonaje(this.personaje);
+
+    //Crear animacion del coche
+    this.animacionCoche = this.model.animacionObjeto(this.personaje, this.model.splinePersonaje, 30000);
+    this.animacionCoche.start();
+
     // Crear cámaras
     this.createCamera();
     this.createFullViewCamera();
@@ -48,8 +61,24 @@ class MyScene extends THREE.Scene {
     // Escuchar eventos de redimensionamiento
     window.addEventListener("resize", () => this.onWindowResize());
 
+    //Agregar el listener para el teclado
+    document.addEventListener('keydown', this.onKeyDown.bind(this), false);
+
     // Primera visualización
     this.update();
+  }
+
+  onKeyDown(event) {
+    switch(event.key) {
+      case 'a':
+        this.model.rotateX(-Math.PI / 64);
+        break;
+      case 'd':
+        this.model.rotateX(Math.PI / 64);
+        break;
+      default:
+        break;
+    }
   }
   
   initStats() {
@@ -64,17 +93,38 @@ class MyScene extends THREE.Scene {
     document.body.appendChild(stats.domElement);
     this.stats = stats;
   }
+
+
   
   createCamera() {
     // Obtener la cámara del modelo
     this.camera = this.model.getCamera();
-    this.camera.lookAt(this.model.getTarget());
+    this.camera.lookAt(this.personaje);
     this.add(this.camera);
 
     // Crear controles para la cámara
     this.cameraControl = new TrackballControls(this.camera, this.renderer.domElement);
-    this.cameraControl.target = this.model.getTarget();
+    this.cameraControl.target = this.personaje;
   }
+
+  // createCamera() {
+  //   // Obtener la cámara del modelo
+  //   this.camera = this.model.getCamera();
+  //   this.add(this.camera);
+  
+  //   // Posicionar la cámara por encima del personaje
+  //   const cameraOffset = new THREE.Vector3(0, 20, 0); // Ajusta la altura según sea necesario
+  //   const characterPosition = this.personaje.position.clone();
+  //   const cameraPosition = characterPosition.clone().add(cameraOffset);
+  //   this.camera.position.copy(cameraPosition);
+  
+  //   // Orientar la cámara hacia abajo, hacia el personaje
+  //   this.camera.lookAt(characterPosition);
+
+  //   this.cameraControl = new TrackballControls(this.camera, this.renderer.domElement);
+  //   this.cameraControl.target = this.personaje;
+
+  // }
 
   createFullViewCamera() {
     // Cámara de vista completa
@@ -176,6 +226,7 @@ class MyScene extends THREE.Scene {
     this.model.update();
 
     this.renderer.render(this, this.activeCamera);
+    
 
     requestAnimationFrame(() => this.update());
   }

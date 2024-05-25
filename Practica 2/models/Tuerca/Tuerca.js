@@ -95,11 +95,11 @@ class Tuerca extends THREE.Object3D {
 
 
     var points = figura.extractPoints().shape;
-    var interior = new THREE.LatheGeometry(points, 32, 0, Math.PI*2);
+    var interior = new THREE.LatheGeometry(points, 16, 0, Math.PI*2);
     var interiorMesh = new THREE.Mesh(interior, material);
     interiorMesh.position.y = -0.4;
 
-    var sphere = new THREE.SphereGeometry(0.99, 32, 32);
+    var sphere = new THREE.SphereGeometry(0.99, 16, 16);
     var sphereMesh = new THREE.Mesh(sphere, material);
 
 

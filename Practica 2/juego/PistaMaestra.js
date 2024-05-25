@@ -27,28 +27,27 @@ class PistaMaestra extends THREE.Object3D {
     /**********************************************************************/
 
     /*****************************PERSONAJE************************************/
-    this.personaje = new Personaje(gui, titleGui);
-    this.personaje.name = 'Personaje';
-    this.add(this.personaje);
+    // this.personaje = new Personaje(gui, titleGui);
+    // this.personaje.name = 'Personaje';
+    // this.add(this.personaje);
 
     this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.set(0, 2, 0);
 
-    this.personaje.add(this.camera);
+
 
 
     var pts = tubo.obtenerPuntos(radio);
-    var splinePersonaje = new THREE.CatmullRomCurve3(pts);
+    this.splinePersonaje = new THREE.CatmullRomCurve3(pts);
     
     
-    var animacion = this.crearAnimacion(splinePersonaje);
-    animacion.start();
+    
 
     // Variable para controlar la rotación manual durante la animación
     this.manualRotationAngle = 0;
 
-    // Agregar event listener para el teclado
-    document.addEventListener('keydown', this.onKeyDown.bind(this), false);
+
+    
     // Agregar event listener para el clic del ratón
     document.addEventListener('click', this.onMouseClick.bind(this), false);
     this.score = 0;
@@ -66,7 +65,7 @@ class PistaMaestra extends THREE.Object3D {
       var ptsBomba = this.recorridoVolador(bomba);
       var splineBomba = new THREE.CatmullRomCurve3(ptsBomba);
 
-      var animacionBomba = this.animacionObjeto(bomba, splineBomba);
+      var animacionBomba = this.animacionObjeto(bomba, splineBomba, 10000);
       
 
       animacionBomba.start();
@@ -81,7 +80,7 @@ class PistaMaestra extends THREE.Object3D {
 
     var ptsTuerca = this.invertirVector(this.recorridoVolador(tuerca));
     var splineTuerca = new THREE.CatmullRomCurve3(ptsTuerca);
-    var animacionTuerca = this.animacionObjeto(tuerca, splineTuerca);
+    var animacionTuerca = this.animacionObjeto(tuerca, splineTuerca, 10000);
 
     animacionTuerca.start();
   /****************************************************************************/
@@ -164,26 +163,15 @@ onMouseClick(event) {
     this.scoreDisplay.score = score;
   }
 
-  onKeyDown(event) {
-    switch(event.key) {
-      case 'a':
-        this.manualRotationAngle += -Math.PI / 8; // Angulo de rotación hacia la izquierda
-        break;
-      case 'd':
-        this.manualRotationAngle += +Math.PI / 8; // Angulo de rotación hacia la derecha
-        break;
-      default:
-        break;
-    }
-  }
+  
 
-  animacionObjeto(objeto, spline){
+  animacionObjeto(objeto, spline, tiempo){
 
     var binormales = spline.computeFrenetFrames(this.segmentos, true).binormals;
 
     var origen = {t : 0};
     var fin = {t : 1};
-    var tiempoDeRecorridoBomba = 10000;
+    var tiempoDeRecorridoBomba = tiempo;
 
     var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorridoBomba).onUpdate(()=> {
       var posicion = spline.getPointAt(origen.t);
@@ -208,17 +196,17 @@ crearAnimacion(splinePersonaje) {
       var posicion = spline.getPointAt(origen.t);
 
       // Mover al personaje principal
-      this.personaje.position.copy(posicion);
-      if (origen.t < 0.9999) {
-          this.personaje.lookAt(spline.getPointAt((origen.t + 0.0001))); // Mirar ligeramente hacia adelante
-      }
+      //this.personaje.position.copy(posicion);
+      // if (origen.t < 0.9999) {
+      //     this.personaje.lookAt(spline.getPointAt((origen.t + 0.0001))); // Mirar ligeramente hacia adelante
+      // }
 
-      var distanciaDetras = -4; // Reducir la distancia detrás del personaje para acercar la cámara
+      var distanciaDetras = -3; // Reducir la distancia detrás del personaje para acercar la cámara
       var alturaCamara = 3.5; // Altura deseada de la cámara por encima del personaje
 
       // Calcular la posición de la cámara relativa al personaje
       var relativeCamPos = new THREE.Vector3(0, alturaCamara, distanciaDetras);
-      relativeCamPos.applyQuaternion(this.personaje.quaternion); // Aplicar la rotación del personaje a la posición relativa
+      //relativeCamPos.applyQuaternion(this.personaje.quaternion); // Aplicar la rotación del personaje a la posición relativa
 
       // Aplicar la posición relativa al personaje
       var camPos = posicion.clone().add(relativeCamPos);
@@ -226,19 +214,16 @@ crearAnimacion(splinePersonaje) {
       // Establecer la posición de la cámara
       this.camera.position.copy(camPos);
 
-      
-
-      // Rotar el personaje principal manualmente
-      this.personaje.rotateZ(this.manualRotationAngle);
-
-      // Recalcular la posición relativa de la cámara después de rotar el personaje
+      // // Recalcular la posición relativa de la cámara después de rotar el personaje
       relativeCamPos = new THREE.Vector3(0, alturaCamara, distanciaDetras);
       relativeCamPos.applyQuaternion(this.personaje.quaternion); // Aplicar la rotación del personaje a la posición relativa
       camPos = posicion.clone().add(relativeCamPos);
       this.camera.position.copy(camPos);
 
-      // Hacer que la cámara mire hacia el personaje
+      // // Hacer que la cámara mire hacia el personaje
       this.camera.lookAt(this.personaje.position);
+      this.camera.rotateZ(Math.PI/2);
+
   });
 
   return animacion.repeat(Infinity);
@@ -246,14 +231,12 @@ crearAnimacion(splinePersonaje) {
 
 
 
+
+
   getCamera(){
     return this.camera;
   }
 
-  getTarget(){
-    return this.personaje.position;
-  }
-  
 
   invertirVector(vector) {
     // Creamos un nuevo vector para almacenar el resultado
@@ -291,6 +274,12 @@ crearAnimacion(splinePersonaje) {
     this.scoreDisplay = { score: 0 };
     gui.add(this.scoreDisplay, 'score').name('Puntuación').listen();
   }
+
+  establecerPersonaje(pers){
+    this.personaje = pers;
+    var animacion = this.crearAnimacion(this.splinePersonaje);
+    animacion.start();
+  }
   
   gestionarColisiones(){
     this.cajaBidon.setFromObject(this.bidon);
@@ -319,10 +308,6 @@ crearAnimacion(splinePersonaje) {
   update () {
     Tween.update();
     this.gestionarColisiones();
-    
-
-    
-    
   }
 }
 
