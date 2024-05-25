@@ -10,9 +10,11 @@ class Tuerca extends THREE.Object3D {
     this.createGUI(gui,titleGui);
     this.userData.tipo = "tuerca";
 
-    var material = new THREE.MeshNormalMaterial();
-    material.flatShading = true;
-    material.needsUpdate = false;
+    var material = new THREE.MeshStandardMaterial({
+      color: 0xEAEAEA,
+      metalness: 0.4,
+      roughness: 0.5 
+    });
 
 
     var figura = new THREE.Shape();

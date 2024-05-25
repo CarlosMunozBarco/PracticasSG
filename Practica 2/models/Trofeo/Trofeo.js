@@ -11,12 +11,13 @@ class Trofeo extends THREE.Object3D {
     this.createGUI(gui,titleGui);
     
     // Definición del material.
-    var material = new THREE.MeshNormalMaterial();  
-    material.flatShading = true;             // Se le aplica flatShading para que se vean las caras planas.
-    material.needsUpdate = false;            // Se fuerza a que se actualice en el renderizado.     
+    this.materialTrofeo = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.6, metalness: 1 });
+    var loader = new THREE.TextureLoader();
+    var textura = loader.load('../../models/Trofeo/base.jpg');
+    var materialBase = new THREE.MeshBasicMaterial({ map: textura });
 
     var box = new THREE.BoxGeometry(1,0.5,1);
-    var boxMesh = new THREE.Mesh(box,material);
+    var boxMesh = new THREE.Mesh(box,materialBase);
     var uno = this.crearUno();
     
     boxMesh.position.y = 0.25;
@@ -30,34 +31,35 @@ class Trofeo extends THREE.Object3D {
     shape.lineTo(0,1.3);
     var points = shape.extractPoints().shape;
     var lathe = new THREE.LatheGeometry(points,16,0,Math.PI*2);
-    var latheMesh = new THREE.Mesh(lathe,material);
+    var latheMesh = new THREE.Mesh(lathe,this.materialTrofeo);
     latheMesh.position.y = 0.5;
 
     var cilindro = new THREE.CylinderGeometry(0.05,0.05,1.8,16,16);
-    var cilindroMesh = new THREE.Mesh(cilindro,material);
+    var cilindroMesh = new THREE.Mesh(cilindro,this.materialTrofeo);
     cilindroMesh.rotateX(Math.PI/2);
     cilindroMesh.position.y = 1.7;
 
     var toro = new THREE.TorusGeometry(0.95,0.05,16,16);
-    var toroMesh = new THREE.Mesh(toro,material);
+    var toroMesh = new THREE.Mesh(toro,this.materialTrofeo);
     toroMesh.rotateY(Math.PI/2);
     toroMesh.position.y = 2;
 
     var aux = new THREE.BoxGeometry(2,2,2);
-    var auxMesh = new THREE.Mesh(aux,material);
+    var auxMesh = new THREE.Mesh(aux,this.materialTrofeo);
     auxMesh.position.y = 2.75;
 
     var csg = new CSG();
     
     csg.union([cilindroMesh,toroMesh]);
     csg.subtract([auxMesh]);
-    csg.union([boxMesh]);
     csg.union([latheMesh]);
     
 
-    var mesh = csg.toMesh(material);
+    var mesh = csg.toMesh(this.materialTrofeo);
     this.add(mesh);
+    this.add(boxMesh);
     this.add(uno);
+
 
   } 
 
@@ -93,7 +95,7 @@ class Trofeo extends THREE.Object3D {
     var material = new THREE.MeshNormalMaterial();
 
     // Crear la malla (mesh)
-    var mesh = new THREE.Mesh(geometry, material);  
+    var mesh = new THREE.Mesh(geometry, this.materialTrofeo);  
 
     mesh.rotateY(-90*Math.PI/180);
     mesh.position.x += 0.55;
