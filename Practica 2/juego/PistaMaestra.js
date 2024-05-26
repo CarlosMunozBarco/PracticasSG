@@ -7,6 +7,7 @@ import { Tuerca } from  '../models/Tuerca/Tuerca.js'
 import { Bidon } from '../models/Bidon/Bidon.js'
 import { Trofeo } from '../models/Trofeo/Trofeo.js'
 import { Peaje } from '../models/Peaje/Peaje.js'
+import { Volante } from '../models/Volante/Volante.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
@@ -117,6 +118,16 @@ class PistaMaestra extends THREE.Object3D {
   this.peaje.position.x -= 2*radio + 3;
 /****************************************************************************/
 
+/******************************VOLANTE*****************************************/
+this.volante = new Volante(false);
+this.add(this.volante);
+this.volante.rotateY(-Math.PI/2);
+this.volante.position.z += 2*radio + 0.05;
+this.volante.position.y -= 4.5;
+this.volante.position.x += radio;
+this.volanteActivo = true;
+/****************************************************************************/
+
 
 
   /*************************COLISIONES***********************************/
@@ -124,6 +135,7 @@ class PistaMaestra extends THREE.Object3D {
     this.cajaBidon = new THREE.Box3();
     this.cajaTrofeo = new THREE.Box3();
     this.cajaPeaje = new THREE.Box3();
+    this.cajaVolante = new THREE.Box3();
   /**********************************************************************/
   }
 
@@ -312,7 +324,8 @@ crearAnimacion(splinePersonaje) {
     this.cajaPersonaje.setFromObject(this.personaje);
     this.cajaTrofeo.setFromObject(this.trofeo);
     this.cajaPeaje.setFromObject(this.peaje);
-    
+    this.cajaVolante.setFromObject(this.volante);
+
     if(this.cajaPersonaje.intersectsBox(this.cajaBidon) && this.bidonActivo == true){
       this.remove(this.cajaBidon);
       this.remove(this.bidon);
@@ -333,6 +346,17 @@ crearAnimacion(splinePersonaje) {
 
       //ESTO LO HARA LA RUEDA
 
+      
+    }
+
+    if(this.cajaPersonaje.intersectsBox(this.cajaVolante) && this.volanteActivo == true){
+
+      this.score += 15;
+      this.updateScoreDisplay(this.score);
+      this.remove(this.cajaVolante);
+      this.remove(this.volante);
+      this.volanteActivo = false;
+
       var posActual = this.peaje.position;
       this.cajaPeaje = new THREE.Box3();
       this.remove(this.peaje);
@@ -343,9 +367,9 @@ crearAnimacion(splinePersonaje) {
       this.peaje.position.x = posActual.x;
       this.peaje.position.y = posActual.y;
       this.peaje.position.z = posActual.z;
-
-
     }
+
+
 
 
     if(this.cajaPersonaje.intersectsBox(this.cajaPeaje) && this.peaje.levantado == false){
