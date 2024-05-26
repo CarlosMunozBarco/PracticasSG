@@ -26,7 +26,7 @@ class MyTubo extends THREE.Object3D {
       texture.needsUpdate = true;
     });
 
-    var material = new THREE.MeshBasicMaterial({ map: textura });
+    var material = new THREE.MeshPhongMaterial({ map: textura });
 
     var meshTubo = new THREE.Mesh(geometriaTubo, material);
 

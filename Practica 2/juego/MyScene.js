@@ -20,12 +20,13 @@ class MyScene extends THREE.Scene {
     // Inicializar estadísticas
     this.initStats();
     
-    // Crear luces
-    this.createLights();
+    
     
     // Crear el modelo y agregarlo a la escena
     this.model = new PistaMaestra(this.gui, "Controles de la Caja");
     this.add(this.model);
+
+    this.personaje = this.model.personaje;
     
     // Crear cámaras
     this.createCamera();
@@ -41,6 +42,9 @@ class MyScene extends THREE.Scene {
       }
     });
 
+    // Crear luces
+    this.createLights();
+
     // Crear los ejes
     this.axis = new THREE.AxesHelper(2);
     this.add(this.axis);
@@ -50,7 +54,7 @@ class MyScene extends THREE.Scene {
 
     // Crear el fondo de cubemap
     this.createBackgroundCubeMap();
-
+    
     // Primera visualización
     this.update();
   }
@@ -149,6 +153,20 @@ class MyScene extends THREE.Scene {
     this.pointLight.power = this.guiControls.lightPower;
     this.pointLight.position.set(0,5, 10);
     this.add(this.pointLight);
+
+    this.luzCoche = new THREE.SpotLight(0x970FF);
+    this.add(this.luzCoche);
+    this.luzCoche.power = 100;
+    this.luzCoche.penumbra = 0.75;
+    this.luzCoche.position.set(0, 10, 10);
+    this.model.personaje.add(this.luzCoche);
+    this.luzCoche.target = this.model.personaje;
+
+    
+
+    const spotLightHelper = new THREE.SpotLightHelper(this.luzCoche);
+    this.add(spotLightHelper);
+    
   }
 
   setLightPower(value) {
@@ -196,6 +214,8 @@ class MyScene extends THREE.Scene {
     this.model.update();
 
     this.renderer.render(this, this.activeCamera);
+
+    this.luzCoche.power = 100 + 150*this.model.score;
 
     requestAnimationFrame(() => this.update());
   }

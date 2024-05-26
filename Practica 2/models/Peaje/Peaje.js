@@ -68,7 +68,7 @@ class Peaje extends THREE.Object3D {
   update () {
     if(this.paloMesh != null){
       if(!this.levantado)
-        this.paloMesh.rotation.x += 0.05;
+      this.paloMesh.rotation.x += 0.05;
     }
     this.rotation.y += 0.01;
   }

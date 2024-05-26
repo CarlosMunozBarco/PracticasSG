@@ -34,6 +34,16 @@ class PistaMaestra extends THREE.Object3D {
     this.personaje.name = 'Personaje';
     this.add(this.personaje);
 
+    this.headlight = new THREE.SpotLight(0x00ff00, 2); // Color verde más llamativo
+    this.headlight.position.set(0, 1, 2); 
+    this.headlight.angle = Math.PI / 6;
+    this.headlight.penumbra = 0.1;
+    this.headlight.distance = 100;
+    this.headlight.target.position.set(0, 0, 10); // Asegurarse de que el objetivo esté hacia adelante
+    this.add(this.headlight.target);
+    this.personaje.add(this.headlight);
+    
+
     this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.set(0, 2, 0);
 
