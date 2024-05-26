@@ -6,6 +6,7 @@ import { Bomba } from  '../models/Bomba/Bomba.js'
 import { Tuerca } from  '../models/Tuerca/Tuerca.js'
 import { Bidon } from '../models/Bidon/Bidon.js'
 import { Trofeo } from '../models/Trofeo/Trofeo.js'
+import { Peaje } from '../models/Peaje/Peaje.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
@@ -107,10 +108,22 @@ class PistaMaestra extends THREE.Object3D {
   
 /****************************************************************************/
 
+/******************************PEAJE*****************************************/
+  this.peaje = new Peaje(false);
+  this.add(this.peaje);
+  this.peaje.rotateY(-Math.PI/2);
+  this.peaje.position.z += radio - 3;
+  this.peaje.position.y += 1.8;
+  this.peaje.position.x -= 2*radio + 3;
+/****************************************************************************/
+
+
+
   /*************************COLISIONES***********************************/
     this.cajaPersonaje = new THREE.Box3();
     this.cajaBidon = new THREE.Box3();
     this.cajaTrofeo = new THREE.Box3();
+    this.cajaPeaje = new THREE.Box3();
   /**********************************************************************/
   }
 
@@ -298,6 +311,7 @@ crearAnimacion(splinePersonaje) {
     this.cajaBidon.setFromObject(this.bidon);
     this.cajaPersonaje.setFromObject(this.personaje);
     this.cajaTrofeo.setFromObject(this.trofeo);
+    this.cajaPeaje.setFromObject(this.peaje);
     
     if(this.cajaPersonaje.intersectsBox(this.cajaBidon) && this.bidonActivo == true){
       this.remove(this.cajaBidon);
@@ -316,7 +330,29 @@ crearAnimacion(splinePersonaje) {
       this.trofeoActivo = false;
       this.score += 10;
       this.updateScoreDisplay(this.score);
+
+      //ESTO LO HARA LA RUEDA
+
+      var posActual = this.peaje.position;
+      this.cajaPeaje = new THREE.Box3();
+      this.remove(this.peaje);
+
+      this.peaje = new Peaje(true);
+      this.add(this.peaje);
+      this.peaje.rotateY(-Math.PI/2);
+      this.peaje.position.x = posActual.x;
+      this.peaje.position.y = posActual.y;
+      this.peaje.position.z = posActual.z;
+
+
     }
+
+
+    if(this.cajaPersonaje.intersectsBox(this.cajaPeaje) && this.peaje.levantado == false){
+      this.score = 0;
+      this.updateScoreDisplay(this.score);
+    }
+
   }
   update () {
     Tween.update();
