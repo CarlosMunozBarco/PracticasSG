@@ -48,6 +48,9 @@ class MyScene extends THREE.Scene {
     // Escuchar eventos de redimensionamiento
     window.addEventListener("resize", () => this.onWindowResize());
 
+    // Crear el fondo de cubemap
+    this.createBackgroundCubeMap();
+
     // Primera visualización
     this.update();
   }
@@ -64,6 +67,23 @@ class MyScene extends THREE.Scene {
     document.body.appendChild(stats.domElement);
     this.stats = stats;
   }
+
+  createBackgroundCubeMap() {
+    const path = '../../juego/'; // No es necesario especificar una ruta si las imágenes están en la misma carpeta que MyScene.js
+    const format = '.png'; // Asegúrate de que la extensión coincida con la de tus imágenes
+    const urls = [
+        path + 'px' + format, path + 'nx' + format,
+        path + 'py' + format, path + 'ny' + format,
+        path + 'pz' + format, path + 'nz' + format
+    ];
+
+    var textureCube = new THREE.CubeTextureLoader().load(urls);
+
+    this.background = textureCube; // Asigna el cubemap como fondo de la escena
+}
+
+
+
   
   createCamera() {
     // Obtener la cámara del modelo
