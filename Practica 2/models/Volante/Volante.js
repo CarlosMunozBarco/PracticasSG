@@ -8,9 +8,7 @@ class Volante extends THREE.Object3D {
     this.createGUI(gui, titleGui);
     
     // Definición del material.
-    var material = new THREE.MeshNormalMaterial();
-    material.flatShading = true;
-    material.needsUpdate = true;
+    var material = new THREE.MeshBasicMaterial({ color: 0x00008B, ior: 1.5, roughness: 0.5, metalness: 0.5});
 
     // Parte exterior del volante (anillo)
     var anilloExterior = new THREE.TorusGeometry(1, 0.1, 16, 16);

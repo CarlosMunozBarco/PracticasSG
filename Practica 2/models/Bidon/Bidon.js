@@ -9,11 +9,10 @@ class Bidon extends THREE.Object3D {
     // Se crea la parte de la interfaz que corresponde a la caja
     // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
     this.createGUI(gui,titleGui);
+
+    var normalMap = new THREE.TextureLoader().load('../../models/Bidon/normalMap.jpg');
+    var material = new THREE.MeshPhongMaterial({color: 0x654321, normalMap: normalMap, normalScale: new THREE.Vector2(1,1), shininess: 100});
     
-    // Definición del material.
-    var material = new THREE.MeshNormalMaterial();  
-    material.flatShading = true;             // Se le aplica flatShading para que se vean las caras planas.
-    material.needsUpdate = false;            // Se fuerza a que se actualice en el renderizado.     
 
     var cilindext = new THREE.CylinderGeometry(0.6,0.6,1.7,16,16);
     var cilindextMesh = new THREE.Mesh(cilindext,material);
