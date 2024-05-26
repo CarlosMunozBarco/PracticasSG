@@ -19,63 +19,58 @@ class Peaje extends THREE.Object3D {
     });
 
     this.material = new THREE.MeshBasicMaterial({ map: textura, side: THREE.DoubleSide});
+    
+    var cilindext = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 16, 16);
+    var cilindextMesh = new THREE.Mesh(cilindext, this.material);
+    cilindextMesh.position.y = 0.75;
 
     if(levantado){
-      var mesh = this.peajeSubido();
+      this.paloMesh = this.peajeSubido();
     }else{
-      var mesh = this.peajeBajado();
+      this.paloMesh = this.peajeBajado();
     }
 
     this.levantado = levantado;
 
-    this.add(mesh);
+    this.add(cilindextMesh);
+    this.add(this.paloMesh);
   }
 
   peajeSubido(){ 
-    var cilindext = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 16, 16);
-    var cilindextMesh = new THREE.Mesh(cilindext, this.material);
+   
 
     var palo = new THREE.CylinderGeometry(0.1, 0.1, 2.5, 16, 16);
     var paloMesh = new THREE.Mesh(palo, this.material);
 
     paloMesh.rotateZ(Math.PI/2 + Math.PI/4);
     paloMesh.position.x = 0.90;
-
-    cilindextMesh.position.y = 0.75;
     paloMesh.position.y = 2;
 
-    var csg = new CSG();
-    csg.union([cilindextMesh, paloMesh]);
-
-    var mesh = csg.toMesh();
-
-    return mesh;
+    return paloMesh;
   }
 
   peajeBajado(){
-    var cilindext = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 16, 16);
-    var cilindextMesh = new THREE.Mesh(cilindext, this.material);
+    
 
     var palo = new THREE.CylinderGeometry(0.1, 0.1, 2.5, 16, 16);
     var paloMesh = new THREE.Mesh(palo, this.material);
 
-    cilindextMesh.position.y = 0.75;
     paloMesh.rotateZ(Math.PI/2);
     paloMesh.position.y = 1.3;
     paloMesh.position.x = 1.20;
 
-    var csg = new CSG();
-    csg.union([cilindextMesh, paloMesh]);
-
-    var mesh = csg.toMesh();
-
-    return mesh;
+    return paloMesh;
   }
 
   createGUI (gui, titleGui) {
   }
 
   update () {
+    if(this.paloMesh != null){
+      if(!this.levantado)
+        this.paloMesh.rotation.x += 0.05;
+    }
+    this.rotation.y += 0.01;
   }
 }
 

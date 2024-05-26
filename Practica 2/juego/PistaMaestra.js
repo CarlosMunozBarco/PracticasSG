@@ -343,9 +343,6 @@ crearAnimacion(splinePersonaje) {
       this.trofeoActivo = false;
       this.score += 10;
       this.updateScoreDisplay(this.score);
-
-      //ESTO LO HARA LA RUEDA
-
       
     }
 
@@ -381,6 +378,9 @@ crearAnimacion(splinePersonaje) {
   update () {
     Tween.update();
     this.gestionarColisiones();
+    if(this.peaje){
+      this.peaje.update();
+    }
     
 
     

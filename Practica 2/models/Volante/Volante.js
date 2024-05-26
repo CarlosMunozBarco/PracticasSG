@@ -5,7 +5,7 @@ class Volante extends THREE.Object3D {
   constructor(gui, titleGui) {
     super();
     
-    this.createGUI(gui, titleGui);
+    this.createGUI(gui, titleGui); 
     
     // Definición del material.
     var material = new THREE.MeshBasicMaterial({ color: 0x00008B, ior: 1.5, roughness: 0.5, metalness: 0.5});
