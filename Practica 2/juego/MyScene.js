@@ -23,7 +23,7 @@ class MyScene extends THREE.Scene {
     
     
     // Crear el modelo y agregarlo a la escena
-    this.model = new PistaMaestra(this.gui, "Controles de la Caja");
+    this.model = new PistaMaestra(this.gui, "Controles de la Caja", this);
     this.add(this.model);
 
     this.personaje = this.model.personaje;
@@ -85,6 +85,13 @@ class MyScene extends THREE.Scene {
 
     this.background = textureCube; // Asigna el cubemap como fondo de la escena
 }
+
+  encenderLuzRoja() {
+    this.luzRoja.power = 500;
+    setTimeout(() => {
+      this.luzRoja.power = 0;
+    }, 3000); // Apaga la luz roja después de 3 segundos
+  }
 
 
 
@@ -154,6 +161,8 @@ class MyScene extends THREE.Scene {
     this.pointLight.position.set(0,5, 10);
     this.add(this.pointLight);
 
+
+    //Luz por conseguir puntos
     this.luzCoche = new THREE.SpotLight(0x970FF);
     this.add(this.luzCoche);
     this.luzCoche.power = 100;
@@ -162,11 +171,29 @@ class MyScene extends THREE.Scene {
     this.model.personaje.add(this.luzCoche);
     this.luzCoche.target = this.model.personaje;
 
+
+    //Luz por perder puntos
+    this.luzRoja = new THREE.SpotLight(0xFF0000);
+    this.add(this.luzRoja);
+    this.luzRoja.power = 0;
+    this.luzRoja.penumbra = 0.75;
+    this.luzRoja.position.set(0, 10, 10);
+    this.model.personaje.add(this.luzRoja);
+    this.luzRoja.target = this.model.personaje;
+
+    //Luz para iluminar el trofeo
+    this.luzTrofeo = new THREE.SpotLight(0xFFFFFF);
+    this.add(this.luzTrofeo);
+    this.luzTrofeo.power = 700;
+    this.luzTrofeo.penumbra = 0.75;
+    this.luzTrofeo.position.set(0, 10, 10);
+    this.model.trofeo.add(this.luzTrofeo);  
+    this.luzTrofeo.target = this.model.trofeo;
     
 
     const spotLightHelper = new THREE.SpotLightHelper(this.luzCoche);
     this.add(spotLightHelper);
-    
+
   }
 
   setLightPower(value) {

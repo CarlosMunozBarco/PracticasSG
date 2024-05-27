@@ -8,10 +8,12 @@ import { Bidon } from '../models/Bidon/Bidon.js'
 import { Trofeo } from '../models/Trofeo/Trofeo.js'
 import { Peaje } from '../models/Peaje/Peaje.js'
 import { Volante } from '../models/Volante/Volante.js'
+import { DRS } from '../models/DRS/DRS.js'
+import { Bandera } from '../models/Bandera/Bandera.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
-  constructor(gui,titleGui) {
+  constructor(gui,titleGui, scene) {
     super();
     
     // Se crea la parte de la interfaz que corresponde a la caja
@@ -21,7 +23,8 @@ class PistaMaestra extends THREE.Object3D {
     const radio = 20;
     this.segmentos = 100;
 
-    
+    //Guardamos la escena
+    this.scene = scene;
 
     /*****************************TUBO*************************************/
     //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
@@ -42,6 +45,8 @@ class PistaMaestra extends THREE.Object3D {
     this.headlight.target.position.set(0, 0, 10); // Asegurarse de que el objetivo esté hacia adelante
     this.add(this.headlight.target);
     this.personaje.add(this.headlight);
+    this.velocidadActual = 30000; //Velocidad del coche
+    this.velocidadMinima = 25000;
     
 
     this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -138,15 +143,38 @@ this.volante.position.x += radio;
 this.volanteActivo = true;
 /****************************************************************************/
 
+/******************************DRS*******************************************/
+this.DRS = new DRS(false);
+this.add(this.DRS);
+this.DRS.rotateY(-Math.PI/2);
+this.DRS.position.z += radio - 2;
+this.DRS.position.y += 2.3;
+this.DRS.position.x -= 2*radio - 4;
+this.DRSActivo = true;
+/****************************************************************************/
+
+/******************************BANDERA*****************************************/
+this.bandera = new Bandera(false);
+this.add(this.bandera);
+this.bandera.rotateX(-Math.PI);
+this.bandera.rotateY(-Math.PI/2);
+this.bandera.position.z += radio - 3;
+this.bandera.position.y -= 2.5;
+this.bandera.position.x -= 2*radio + 3;
+this.banderaActivo = true;
+/****************************************************************************/
 
 
-  /*************************COLISIONES***********************************/
-    this.cajaPersonaje = new THREE.Box3();
-    this.cajaBidon = new THREE.Box3();
-    this.cajaTrofeo = new THREE.Box3();
-    this.cajaPeaje = new THREE.Box3();
-    this.cajaVolante = new THREE.Box3();
-  /**********************************************************************/
+
+/*************************COLISIONES***********************************/
+  this.cajaPersonaje = new THREE.Box3();
+  this.cajaBidon = new THREE.Box3();
+  this.cajaTrofeo = new THREE.Box3();
+  this.cajaPeaje = new THREE.Box3();
+  this.cajaVolante = new THREE.Box3();
+  this.cajaDRS = new THREE.Box3();
+  this.cajaBandera = new THREE.Box3();  
+/**********************************************************************/
   }
 
 // Implementa el método onMouseClick
@@ -197,7 +225,12 @@ onMouseClick(event) {
   // Implementa el método updateScoreDisplay
   updateScoreDisplay(score) {
     // Actualiza la puntuación en la interfaz gráfica de usuario
+    if(score < 0){
+      this.score = 0;
+      score = 0;
+    }
     this.scoreDisplay.score = score;
+    this.scene.encenderLuzRoja();
   }
 
   onKeyDown(event) {
@@ -217,7 +250,7 @@ onMouseClick(event) {
 
     var binormales = spline.computeFrenetFrames(this.segmentos, true).binormals;
 
-    var origen = {t : 0};
+    var origen = {t : 0}; 
     var fin = {t : 1};
     var tiempoDeRecorridoBomba = 10000;
 
@@ -237,10 +270,9 @@ onMouseClick(event) {
 crearAnimacion(splinePersonaje) {
   var origen = { t: 0 };
   var fin = { t: 1 };
-  var tiempoDeRecorrido = 30000;
   var spline = splinePersonaje.clone();
 
-  var animacion = new Tween.Tween(origen).to(fin, tiempoDeRecorrido).onUpdate(() => {
+  var animacion = new Tween.Tween(origen).to(fin, this.velocidadActual).onUpdate(() => {
       var posicion = spline.getPointAt(origen.t);
 
       // Mover al personaje principal
@@ -276,8 +308,14 @@ crearAnimacion(splinePersonaje) {
       // Hacer que la cámara mire hacia el personaje
       this.camera.lookAt(this.personaje.position);
       this.camera.rotateZ(-this.manualRotationAngle);
-  });
 
+       // Detectar vuelta completa
+       if (origen.t >= 1.0 && this.velocidadActual > this.velocidadMinima) {
+        this.velocidadActual *= 0.9; // Aumentar la velocidad un 10%
+        this.crearAnimacion(splinePersonaje); // Reiniciar la animación con la nueva velocidad
+      }
+  });
+  animacion.start();
   return animacion.repeat(Infinity);
 }
 
@@ -335,15 +373,14 @@ crearAnimacion(splinePersonaje) {
     this.cajaTrofeo.setFromObject(this.trofeo);
     this.cajaPeaje.setFromObject(this.peaje);
     this.cajaVolante.setFromObject(this.volante);
+    this.cajaDRS.setFromObject(this.DRS);
+    this.cajaBandera.setFromObject(this.bandera);
 
     if(this.cajaPersonaje.intersectsBox(this.cajaBidon) && this.bidonActivo == true){
       this.remove(this.cajaBidon);
       this.remove(this.bidon);
       this.bidonActivo = false;
       this.score -= 10;
-      if(this.score < 0){
-        this.score = 0;
-      }
       this.updateScoreDisplay(this.score);
     }
 
@@ -354,6 +391,19 @@ crearAnimacion(splinePersonaje) {
       this.score += 10;
       this.updateScoreDisplay(this.score);
       
+    }
+
+    if(this.cajaPersonaje.intersectsBox(this.cajaDRS) && this.DRSActivo == true){
+      this.remove(this.cajaDRS);
+      this.remove(this.DRS);
+      this.DRSActivo = false;
+      this.score += 10;
+      this.updateScoreDisplay(this.score);
+      //Bufo de velocidad temporal para la siguiente vuelta
+      this.velocidadActual -= 100;
+      setTimeout(() => {
+        this.velocidadActual-= 100;
+      }, 5000);
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaVolante) && this.volanteActivo == true){
@@ -376,8 +426,13 @@ crearAnimacion(splinePersonaje) {
       this.peaje.position.z = posActual.z;
     }
 
-
-
+    if(this.cajaPersonaje.intersectsBox(this.cajaBandera) && this.banderaActivo == true){
+      this.remove(this.cajaBandera);
+      this.remove(this.bandera);
+      this.banderaActivo = false;
+      this.score = this.score/2;
+      this.updateScoreDisplay(this.score);
+    }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaPeaje) && this.peaje.levantado == false){
       this.score = 0;
@@ -391,10 +446,7 @@ crearAnimacion(splinePersonaje) {
     if(this.peaje){
       this.peaje.update();
     }
-    
-
-    
-    
+  
   }
 }
 
