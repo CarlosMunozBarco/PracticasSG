@@ -184,11 +184,20 @@ class MyScene extends THREE.Scene {
     //Luz para iluminar el trofeo
     this.luzTrofeo = new THREE.SpotLight(0xFFFFFF);
     this.add(this.luzTrofeo);
-    this.luzTrofeo.power = 700;
+    this.luzTrofeo.power = 900;
     this.luzTrofeo.penumbra = 0.75;
     this.luzTrofeo.position.set(0, 10, 10);
     this.model.trofeo.add(this.luzTrofeo);  
     this.luzTrofeo.target = this.model.trofeo;
+
+    //Luz para iluminar el trofeo
+    this.luzCronometro = new THREE.SpotLight(0xFFFFFF);
+    this.add(this.luzCronometro);
+    this.luzCronometro.power = 900;
+    this.luzCronometro.penumbra = 0.75;
+    this.luzCronometro.position.set(0, 10, 10);
+    this.model.cronometro.add(this.luzCronometro);  
+    this.luzCronometro.target = this.model.cronometro;
     
 
     const spotLightHelper = new THREE.SpotLightHelper(this.luzCoche);

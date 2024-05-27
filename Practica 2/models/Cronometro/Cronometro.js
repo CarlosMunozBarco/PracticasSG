@@ -11,9 +11,9 @@ class Cronometro extends THREE.Object3D {
     var materialLoader = new MTLLoader();
     var objetoLoader = new OBJLoader();
 
-    materialLoader.load ('./obj/11751_Watch_v1_L3.mtl', (materials) => {
+    materialLoader.load ('../../models/Cronometro/obj/11751_Watch_v1_L3.mtl', (materials) => {
       objetoLoader.setMaterials(materials);
-      objetoLoader.load('./obj/11751_Watch_v1_L3.obj', (object) => {
+      objetoLoader.load('../../models/Cronometro/obj/11751_Watch_v1_L3.obj', (object) => {
         object.scale.set(0.1,0.1,0.1);
         object.rotateX(-Math.PI/2);
         this.add(object);

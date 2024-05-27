@@ -10,6 +10,7 @@ import { Peaje } from '../models/Peaje/Peaje.js'
 import { Volante } from '../models/Volante/Volante.js'
 import { DRS } from '../models/DRS/DRS.js'
 import { Bandera } from '../models/Bandera/Bandera.js'
+import { Cronometro } from '../models/Cronometro/Cronometro.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
@@ -46,7 +47,7 @@ class PistaMaestra extends THREE.Object3D {
     this.add(this.headlight.target);
     this.personaje.add(this.headlight);
     this.velocidadActual = 30000; //Velocidad del coche
-    this.velocidadMinima = 25000;
+    this.velocidadMinima = 20000;
     
 
     this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -134,35 +135,41 @@ class PistaMaestra extends THREE.Object3D {
 /****************************************************************************/
 
 /******************************VOLANTE*****************************************/
-this.volante = new Volante(false);
-this.add(this.volante);
-this.volante.rotateY(-Math.PI/2);
-this.volante.position.z += 2*radio + 0.05;
-this.volante.position.y -= 4.5;
-this.volante.position.x += radio;
-this.volanteActivo = true;
+  this.volante = new Volante();
+  this.add(this.volante);
+  this.volante.rotateY(-Math.PI/2);
+  this.volante.position.z += 2*radio + 0.05;
+  this.volante.position.y -= 4.5;
+  this.volante.position.x += radio;
+  this.volanteActivo = true;
 /****************************************************************************/
 
 /******************************DRS*******************************************/
-this.DRS = new DRS(false);
-this.add(this.DRS);
-this.DRS.rotateY(-Math.PI/2);
-this.DRS.position.z += radio - 2;
-this.DRS.position.y += 2.3;
-this.DRS.position.x -= 2*radio - 4;
-this.DRSActivo = true;
+  this.DRS = new DRS();
+  this.add(this.DRS);
+  this.DRS.rotateY(-Math.PI/2);
+  this.DRS.position.z += radio - 2;
+  this.DRS.position.y += 2.3;
+  this.DRS.position.x -= 2*radio - 4;
+  this.DRSActivo = true;
 /****************************************************************************/
 
 /******************************BANDERA*****************************************/
-this.bandera = new Bandera(false);
-this.add(this.bandera);
-this.bandera.rotateX(-Math.PI);
-this.bandera.rotateY(-Math.PI/2);
-this.bandera.position.z += radio - 3;
-this.bandera.position.y -= 2.5;
-this.bandera.position.x -= 2*radio + 3;
-this.banderaActivo = true;
+  this.bandera = new Bandera();
+  this.add(this.bandera);
+  this.bandera.rotateX(-Math.PI);
+  this.bandera.rotateY(-Math.PI/2);
+  this.bandera.position.z += radio - 3;
+  this.bandera.position.y -= 2.5;
+  this.bandera.position.x -= 2*radio + 3;
+  this.banderaActivo = true;
 /****************************************************************************/
+
+/******************************Cronometro*****************************************/
+  this.crearCronometro();
+/****************************************************************************/
+
+
 
 
 
@@ -174,6 +181,7 @@ this.banderaActivo = true;
   this.cajaVolante = new THREE.Box3();
   this.cajaDRS = new THREE.Box3();
   this.cajaBandera = new THREE.Box3();  
+  this.cajaCronometro = new THREE.Box3();
 /**********************************************************************/
   }
 
@@ -222,15 +230,33 @@ onMouseClick(event) {
   }
 }
 
+  crearCronometro(){
+    const radio = 20;
+    this.cronometro = new Cronometro();
+    this.add(this.cronometro);
+    this.cronometro.scale.set(2, 2, 2);
+    this.cronometro.rotateY(Math.PI/2);
+    this.cronometro.position.z += 2*radio + 0.05;
+    this.cronometro.position.y += 2;
+    this.cronometro.position.x -= 2*radio;
+    this.cronometroActivo = true;
+    
+  }
+
   // Implementa el método updateScoreDisplay
-  updateScoreDisplay(score) {
+  updateScoreDisplay(score, perder = false) {
     // Actualiza la puntuación en la interfaz gráfica de usuario
+
+    //Encender una luz roja si se han perdido puntos
+    if(perder)
+      this.scene.encenderLuzRoja();
+
     if(score < 0){
       this.score = 0;
       score = 0;
     }
     this.scoreDisplay.score = score;
-    this.scene.encenderLuzRoja();
+    
   }
 
   onKeyDown(event) {
@@ -375,20 +401,32 @@ crearAnimacion(splinePersonaje) {
     this.cajaVolante.setFromObject(this.volante);
     this.cajaDRS.setFromObject(this.DRS);
     this.cajaBandera.setFromObject(this.bandera);
+    this.cajaCronometro.setFromObject(this.cronometro);
 
     if(this.cajaPersonaje.intersectsBox(this.cajaBidon) && this.bidonActivo == true){
       this.remove(this.cajaBidon);
       this.remove(this.bidon);
       this.bidonActivo = false;
       this.score -= 10;
+      this.updateScoreDisplay(this.score, true);
+    }
+
+    if(this.cajaPersonaje.intersectsBox(this.cajaCronometro) && this.cronometroActivo == true){
+      this.remove(this.cajaCronometro);
+      this.remove(this.cronometro);
+      this.cronometroActivo = false;
+      this.score += 3;
       this.updateScoreDisplay(this.score);
+      setTimeout(() => {
+        this.crearCronometro();
+      }, 2000);
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaTrofeo) && this.trofeoActivo == true){
       this.remove(this.cajaTrofeo);
       this.remove(this.trofeo);
       this.trofeoActivo = false;
-      this.score += 10;
+      this.score += 7;
       this.updateScoreDisplay(this.score);
       
     }
@@ -397,7 +435,7 @@ crearAnimacion(splinePersonaje) {
       this.remove(this.cajaDRS);
       this.remove(this.DRS);
       this.DRSActivo = false;
-      this.score += 10;
+      this.score += 5;
       this.updateScoreDisplay(this.score);
       //Bufo de velocidad temporal para la siguiente vuelta
       this.velocidadActual -= 100;
@@ -408,7 +446,7 @@ crearAnimacion(splinePersonaje) {
 
     if(this.cajaPersonaje.intersectsBox(this.cajaVolante) && this.volanteActivo == true){
 
-      this.score += 15;
+      this.score += 10;
       this.updateScoreDisplay(this.score);
       this.remove(this.cajaVolante);
       this.remove(this.volante);
@@ -431,12 +469,12 @@ crearAnimacion(splinePersonaje) {
       this.remove(this.bandera);
       this.banderaActivo = false;
       this.score = this.score/2;
-      this.updateScoreDisplay(this.score);
+      this.updateScoreDisplay(this.score, true);
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaPeaje) && this.peaje.levantado == false){
       this.score = 0;
-      this.updateScoreDisplay(this.score);
+      this.updateScoreDisplay(this.score, true);
     }
 
   }
