@@ -11,7 +11,7 @@ class Pistola extends THREE.Object3D {
     var material = new THREE.MeshBasicMaterial({ color: 0xff00ff, ior: 1.5, roughness: 0.5, metalness: 1});
     var objetoLoader = new OBJLoader();
 
-      objetoLoader.load('./Drill.obj', (object) => {
+      objetoLoader.load('../../models/Pistola/Drill.obj', (object) => {
         object.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.material = material;

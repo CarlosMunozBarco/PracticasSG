@@ -11,57 +11,49 @@ import { Volante } from '../models/Volante/Volante.js'
 import { DRS } from '../models/DRS/DRS.js'
 import { Bandera } from '../models/Bandera/Bandera.js'
 import { Cronometro } from '../models/Cronometro/Cronometro.js'
+import { Pistola } from '../models/Pistola/Pistola.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
   constructor(gui,titleGui, scene) {
     super();
     
-    // Se crea la parte de la interfaz que corresponde a la caja
-    //Comprobando que funciona
-    // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
+    //Se crea la interfaz
     this.createGUI(gui,titleGui);
-    const radio = 20;
-    this.segmentos = 100;
+
+    //Se definen las variables constantes y valores numéricos
+    const radio = 20; //El radio que define lo grande o pequeño que sera el circuito
+    this.velocidadActual = 30000; //Velocidad del coche (tiempo que tarda en dar una vuelta)
+    this.velocidadMinima = 15000; //Velocidad maxima del coche (el tiempo minimo que puede tardar en dar una vuelta)
 
     //Guardamos la escena
     this.scene = scene;
 
     /*****************************TUBO*************************************/
-    //Se le pasa radio, altura, numero de vueltas y espacio entre vueltas
+    //Crea el circuito en base al radio
     var tubo = new MyTubo(radio);
     this.add(tubo);
     /**********************************************************************/
 
     /*****************************PERSONAJE************************************/
+    //Crea el personaje
     this.personaje = new Personaje(gui, titleGui);
     this.personaje.name = 'Personaje';
     this.add(this.personaje);
 
-    this.headlight = new THREE.SpotLight(0x00ff00, 2); // Color verde más llamativo
-    this.headlight.position.set(0, 1, 2); 
-    this.headlight.angle = Math.PI / 6;
-    this.headlight.penumbra = 0.1;
-    this.headlight.distance = 100;
-    this.headlight.target.position.set(0, 0, 10); // Asegurarse de que el objetivo esté hacia adelante
-    this.add(this.headlight.target);
-    this.personaje.add(this.headlight);
-    this.velocidadActual = 30000; //Velocidad del coche
-    this.velocidadMinima = 20000;
-    
-
+    //Se crea la camara que seguirá al personaje
     this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.set(0, 2, 0);
-
     this.personaje.add(this.camera);
 
 
+    //Se obtienen los puntos que conforman el tubo para poder crear la animación del coche y la cámara
     var pts = tubo.obtenerPuntos(radio);
-    var splinePersonaje = new THREE.CatmullRomCurve3(pts);
+    this.splinePersonaje = new THREE.CatmullRomCurve3(pts);
     
+    //Se crea la animación de la cámara y el coche en base a los puntos del tubo
+    this.crearAnimacion(this.splinePersonaje, false);
     
-    var animacion = this.crearAnimacion(splinePersonaje);
-    animacion.start();
 
     // Variable para controlar la rotación manual durante la animación
     this.manualRotationAngle = 0;
@@ -76,31 +68,30 @@ class PistaMaestra extends THREE.Object3D {
 
 
     /******************************BOMBA*****************************************/
-      var bomba = new Bomba(gui, titleGui);
+      var bomba = new Bomba(gui, titleGui); //Se crea la bomba
       this.add(bomba);
       bomba.position.z += 3*radio - 10;
       bomba.position.y += 5;
       bomba.scale.set(0.5, 0.5, 0.5);
 
-      var ptsBomba = this.recorridoVolador(bomba);
+      var ptsBomba = this.recorridoVolador(bomba); //Se obtiene el camino que recorrera la bomba
       var splineBomba = new THREE.CatmullRomCurve3(ptsBomba);
 
-      var animacionBomba = this.animacionObjeto(bomba, splineBomba);
+      var animacionBomba = this.animacionObjeto(bomba, splineBomba); //Se crea la animación de la bomba en base a dichos puntos
       
-
       animacionBomba.start();
     /****************************************************************************/
 
     /******************************TUERCA*****************************************/
-    var tuerca = new Tuerca(gui, titleGui);
+    var tuerca = new Tuerca(gui, titleGui); //Se crea la tuerca
     this.add(tuerca);
     tuerca.position.z += 3*radio - 10;
     tuerca.position.y += 5;
     tuerca.position.x -= 3;
 
-    var ptsTuerca = this.invertirVector(this.recorridoVolador(tuerca));
+    var ptsTuerca = this.invertirVector(this.recorridoVolador(tuerca)); //Se obtiene el camino que recorrerá la tuerca
     var splineTuerca = new THREE.CatmullRomCurve3(ptsTuerca);
-    var animacionTuerca = this.animacionObjeto(tuerca, splineTuerca);
+    var animacionTuerca = this.animacionObjeto(tuerca, splineTuerca); //Se crea la animación de la tuerca en base a dichos puntos
 
     animacionTuerca.start();
   /****************************************************************************/
@@ -141,7 +132,8 @@ class PistaMaestra extends THREE.Object3D {
   this.volante.position.z += 2*radio + 0.05;
   this.volante.position.y -= 4.5;
   this.volante.position.x += radio;
-  this.volanteActivo = true;
+  this.volanteActivo = true; //Variable que sirve para controlar si el objeto esta o no activo.
+  //Sirve para evitar que aplique varias veces las consecuencias de la colisión antes de desaparecer
 /****************************************************************************/
 
 /******************************DRS*******************************************/
@@ -165,15 +157,24 @@ class PistaMaestra extends THREE.Object3D {
   this.banderaActivo = true;
 /****************************************************************************/
 
+
 /******************************Cronometro*****************************************/
-  this.crearCronometro();
+  this.crearCronometro(); //Funcion que crea el cronometro y lo situa en el lugar correcto
+/****************************************************************************/
+
+/******************************Pistola*****************************************/
+  this.pistola = new Pistola();
+  this.add(this.pistola);
+  this.pistola.position.z += radio - 1;
+  this.pistola.position.y += 2;
+  this.pistola.position.x -= 2*radio - 15;
+  this.pistolaActiva = true;
 /****************************************************************************/
 
 
-
-
-
 /*************************COLISIONES***********************************/
+//Creamos una caja para todos los objetos de la escena, que luego servira para gestionar las colisiones
+
   this.cajaPersonaje = new THREE.Box3();
   this.cajaBidon = new THREE.Box3();
   this.cajaTrofeo = new THREE.Box3();
@@ -182,6 +183,7 @@ class PistaMaestra extends THREE.Object3D {
   this.cajaDRS = new THREE.Box3();
   this.cajaBandera = new THREE.Box3();  
   this.cajaCronometro = new THREE.Box3();
+  this.cajaPistola = new THREE.Box3();
 /**********************************************************************/
   }
 
@@ -230,6 +232,7 @@ onMouseClick(event) {
   }
 }
 
+  //Crea el cronometro y lo situa en el lugar correcto
   crearCronometro(){
     const radio = 20;
     this.cronometro = new Cronometro();
@@ -259,6 +262,8 @@ onMouseClick(event) {
     
   }
 
+
+  //Gestiona que pulsar las teclas a y d modifiquen el angulo de rotación del coche y la cámara
   onKeyDown(event) {
     switch(event.key) {
       case 'a':
@@ -272,9 +277,11 @@ onMouseClick(event) {
     }
   }
 
+  //Función que sirve para crear una animación para un objeto en base a un spline dado
   animacionObjeto(objeto, spline){
 
-    var binormales = spline.computeFrenetFrames(this.segmentos, true).binormals;
+    var segmentos = 100; 
+    var binormales = spline.computeFrenetFrames(segmentos, true).binormals;
 
     var origen = {t : 0}; 
     var fin = {t : 1};
@@ -285,7 +292,7 @@ onMouseClick(event) {
       objeto.position.copy(posicion);
       var tangente = spline.getTangentAt(origen.t);
       posicion.add(tangente);
-      objeto.up = binormales[Math.floor(origen.t * this.segmentos)];
+      objeto.up = binormales[Math.floor(origen.t * segmentos)];
       objeto.lookAt(posicion);
   })
 
@@ -293,12 +300,41 @@ onMouseClick(event) {
 
 }
 
-crearAnimacion(splinePersonaje) {
+//Modifica la velocidad actual del coche y la cámara. Basicamente, crea una nueva animación con la velocidad actualizada 
+//que sustituye a la antigua
+modificarVelocidad(cantidad){
+
+  if(this.velocidadActual - 2000*cantidad > this.velocidadMinima){
+    this.velocidadActual -= 2000*cantidad;
+  }else{
+    this.velocidadActual = this.velocidadMinima;
+  }
+
+  console.log(this.velocidadActual);
+  this.crearAnimacion(this.splinePersonaje, true);
+}
+
+
+//Crea la animación del coche y la cámara
+crearAnimacion(splinePersonaje, iniciada) {
+
   var origen = { t: 0 };
   var fin = { t: 1 };
   var spline = splinePersonaje.clone();
 
-  var animacion = new Tween.Tween(origen).to(fin, this.velocidadActual).onUpdate(() => {
+  if(this.animacion){
+    this.animacion.stop();
+  }
+
+  //Comprobamos si la animación ha sido reiniciada para modificar la velocidad o no
+  if(iniciada == true){
+    origen.t = this.tActual;
+  }
+
+  this.tActual = origen.t;
+  //                                               Si la animación se reinicia en un punto avanzado, el tiempo 
+  //                                               de recorrido se ajusta para que la sensación de velocidad no cambie
+  this.animacion = new Tween.Tween(origen).to(fin, this.velocidadActual*(fin.t-origen.t)).onUpdate(() => {
       var posicion = spline.getPointAt(origen.t);
 
       // Mover al personaje principal
@@ -336,13 +372,18 @@ crearAnimacion(splinePersonaje) {
       this.camera.rotateZ(-this.manualRotationAngle);
 
        // Detectar vuelta completa
-       if (origen.t >= 1.0 && this.velocidadActual > this.velocidadMinima) {
-        this.velocidadActual *= 0.9; // Aumentar la velocidad un 10%
-        this.crearAnimacion(splinePersonaje); // Reiniciar la animación con la nueva velocidad
+       if (origen.t >= 1.0 ) {
+        if(this.velocidadActual > this.velocidadMinima){
+          this.velocidadActual *= 0.9; // Aumentar la velocidad un 10%
+        }
+        this.crearAnimacion(splinePersonaje, false); // Reiniciar la animación con la nueva velocidad
       }
+      
+      //Guardamos el punto de la animación en el que nos encontramos para poder reiniciar la animación por donde estaba
+      //pero con la velocidad modificada (cuando se llame a modificarVelocidad())
+      this.tActual = origen.t;
   });
-  animacion.start();
-  return animacion.repeat(Infinity);
+  this.animacion.start();
 }
 
 
@@ -387,13 +428,31 @@ crearAnimacion(splinePersonaje) {
     return puntos;
  }
 
+  //Modificamos el peaje para que ahora tenga la barra levantada
+  modificarPeaje(){
+    var posActual = this.peaje.position;
+    this.cajaPeaje = new THREE.Box3();
+    this.remove(this.peaje);
+
+    this.peaje = new Peaje(true);
+    this.add(this.peaje);
+    this.peaje.rotateY(-Math.PI/2);
+    this.peaje.position.x = posActual.x;
+    this.peaje.position.y = posActual.y;
+    this.peaje.position.z = posActual.z;
+  }
+
   createGUI (gui,titleGui) {
     // Mostrar la puntuación
     this.scoreDisplay = { score: 0 };
     gui.add(this.scoreDisplay, 'score').name('Puntuación').listen();
   }
   
+
+  //Esta funcion sirve para gestionar todo lo relacionado con las colisiones entre el personaje y los objetos de la escena
   gestionarColisiones(){
+
+    //Asinamos a cada caja un objeto
     this.cajaBidon.setFromObject(this.bidon);
     this.cajaPersonaje.setFromObject(this.personaje);
     this.cajaTrofeo.setFromObject(this.trofeo);
@@ -402,6 +461,17 @@ crearAnimacion(splinePersonaje) {
     this.cajaDRS.setFromObject(this.DRS);
     this.cajaBandera.setFromObject(this.bandera);
     this.cajaCronometro.setFromObject(this.cronometro);
+    this.cajaPistola.setFromObject(this.pistola);
+
+    //Si el personaje colisiona con un objeto, su velocidad y puntaje se ven afectados
+    if(this.cajaPersonaje.intersectsBox(this.cajaPistola) && this.pistolaActiva == true){
+      this.remove(this.cajaPistola);
+      this.remove(this.pistola);
+      this.pistolaActiva = false;
+      this.score -= 4;
+      this.updateScoreDisplay(this.score, true);
+      this.modificarVelocidad(2);
+    }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaBidon) && this.bidonActivo == true){
       this.remove(this.cajaBidon);
@@ -409,6 +479,7 @@ crearAnimacion(splinePersonaje) {
       this.bidonActivo = false;
       this.score -= 10;
       this.updateScoreDisplay(this.score, true);
+      this.modificarVelocidad(-2);
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaCronometro) && this.cronometroActivo == true){
@@ -417,9 +488,12 @@ crearAnimacion(splinePersonaje) {
       this.cronometroActivo = false;
       this.score += 3;
       this.updateScoreDisplay(this.score);
+
+      //El cronometro es el único objeto que reaparece tras cogerlo
       setTimeout(() => {
         this.crearCronometro();
       }, 2000);
+      this.modificarVelocidad(1);
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaTrofeo) && this.trofeoActivo == true){
@@ -428,7 +502,7 @@ crearAnimacion(splinePersonaje) {
       this.trofeoActivo = false;
       this.score += 7;
       this.updateScoreDisplay(this.score);
-      
+      this.modificarVelocidad(2);
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaDRS) && this.DRSActivo == true){
@@ -437,10 +511,10 @@ crearAnimacion(splinePersonaje) {
       this.DRSActivo = false;
       this.score += 5;
       this.updateScoreDisplay(this.score);
-      //Bufo de velocidad temporal para la siguiente vuelta
-      this.velocidadActual -= 100;
+      //Bufo de velocidad temporal 
+      this.modificarVelocidad(2);
       setTimeout(() => {
-        this.velocidadActual-= 100;
+        this.modificarVelocidad(-2);
       }, 5000);
     }
 
@@ -451,17 +525,9 @@ crearAnimacion(splinePersonaje) {
       this.remove(this.cajaVolante);
       this.remove(this.volante);
       this.volanteActivo = false;
-
-      var posActual = this.peaje.position;
-      this.cajaPeaje = new THREE.Box3();
-      this.remove(this.peaje);
-
-      this.peaje = new Peaje(true);
-      this.add(this.peaje);
-      this.peaje.rotateY(-Math.PI/2);
-      this.peaje.position.x = posActual.x;
-      this.peaje.position.y = posActual.y;
-      this.peaje.position.z = posActual.z;
+      //Coger el volante implica levantar la barra del peaje
+      this.modificarPeaje();
+      this.modificarVelocidad(2);
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaBandera) && this.banderaActivo == true){
@@ -470,14 +536,17 @@ crearAnimacion(splinePersonaje) {
       this.banderaActivo = false;
       this.score = this.score/2;
       this.updateScoreDisplay(this.score, true);
+      this.modificarVelocidad(-2);
     }
 
+    //El peaje solo resta puntaje si no esta levantado
     if(this.cajaPersonaje.intersectsBox(this.cajaPeaje) && this.peaje.levantado == false){
       this.score = 0;
       this.updateScoreDisplay(this.score, true);
     }
 
   }
+  
   update () {
     Tween.update();
     this.gestionarColisiones();

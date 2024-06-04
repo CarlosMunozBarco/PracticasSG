@@ -86,6 +86,7 @@ class MyScene extends THREE.Scene {
     this.background = textureCube; // Asigna el cubemap como fondo de la escena
 }
 
+  //Función que aumenta la intensidad de la luz roja (la "enciende") durante 3 segundos
   encenderLuzRoja() {
     this.luzRoja.power = 500;
     setTimeout(() => {
@@ -95,7 +96,7 @@ class MyScene extends THREE.Scene {
 
 
 
-  
+  //Crea la cámara
   createCamera() {
     // Obtener la cámara del modelo
     this.camera = this.model.getCamera();
@@ -107,6 +108,7 @@ class MyScene extends THREE.Scene {
     this.cameraControl.target = this.model.getTarget();
   }
 
+  //Crea la camara
   createFullViewCamera() {
     // Cámara de vista completa
     this.fullViewCamera = new THREE.PerspectiveCamera(110, window.innerWidth / window.innerHeight, 0.1, 50);
@@ -119,6 +121,7 @@ class MyScene extends THREE.Scene {
     this.fullViewCameraControl.target.set(0, 0, 30);
   }
 
+  //Cambia a la cámara que NO se este usando
   toggleCamera() {
     if (this.activeCamera === this.camera) {
       this.activeCamera = this.fullViewCamera;
@@ -127,15 +130,8 @@ class MyScene extends THREE.Scene {
     }
   }
 
-  createGround() {
-    var geometryGround = new THREE.BoxGeometry(10, 0.2, 10);
-    var texture = new THREE.TextureLoader().load('../imgs/wood.jpg');
-    var materialGround = new THREE.MeshStandardMaterial({ map: texture });
-    var ground = new THREE.Mesh(geometryGround, materialGround);
-    ground.position.y = -0.1;
-    this.add(ground);
-  }
 
+  //Crea la interfaz
   createGUI() {
     var gui = new GUI();
     this.guiControls = {
@@ -152,14 +148,13 @@ class MyScene extends THREE.Scene {
     return gui;
   }
 
+  
+  //Crea las luces
   createLights() {
+
+    //Luz ambiental
     this.ambientLight = new THREE.AmbientLight('white', this.guiControls.ambientIntensity);
     this.add(this.ambientLight);
-    
-    this.pointLight = new THREE.PointLight(0xffffff);
-    this.pointLight.power = this.guiControls.lightPower;
-    this.pointLight.position.set(0,5, 10);
-    this.add(this.pointLight);
 
 
     //Luz por conseguir puntos
@@ -190,7 +185,7 @@ class MyScene extends THREE.Scene {
     this.model.trofeo.add(this.luzTrofeo);  
     this.luzTrofeo.target = this.model.trofeo;
 
-    //Luz para iluminar el trofeo
+    //Luz para iluminar el cronometro
     this.luzCronometro = new THREE.SpotLight(0xFFFFFF);
     this.add(this.luzCronometro);
     this.luzCronometro.power = 900;
@@ -205,6 +200,8 @@ class MyScene extends THREE.Scene {
 
   }
 
+  
+
   setLightPower(value) {
     this.pointLight.power = value;
   }
@@ -217,6 +214,7 @@ class MyScene extends THREE.Scene {
     this.axis.visible = value;
   }
 
+  //Crea el renderer
   createRenderer(myCanvas) {
     var renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(new THREE.Color(0xEEEEEE), 1.0);
@@ -236,10 +234,12 @@ class MyScene extends THREE.Scene {
     this.fullViewCamera.updateProjectionMatrix();
   }
 
+  //Define el comportamiento al modificar el tamaño de la ventana
   onWindowResize() {
     this.setCameraAspect(window.innerWidth / window.innerHeight);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
+
 
   update() {
     if (this.stats) this.stats.update();
@@ -251,6 +251,7 @@ class MyScene extends THREE.Scene {
 
     this.renderer.render(this, this.activeCamera);
 
+    //Modifica la intensidad de la luz azul que apunta al coche en base a los puntos obtenidos
     this.luzCoche.power = 100 + 150*this.model.score;
 
     requestAnimationFrame(() => this.update());
