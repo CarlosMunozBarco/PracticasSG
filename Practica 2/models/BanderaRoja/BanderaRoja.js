@@ -1,7 +1,7 @@
 import * as THREE from '../../libs/three.module.js';
 import { CSG } from '../../libs/CSG-v2.js';
 
-class Bandera extends THREE.Object3D {
+class BanderaRoja extends THREE.Object3D {
   constructor(gui, titleGui) {
     super();
     
@@ -55,4 +55,4 @@ class Bandera extends THREE.Object3D {
   }
 }
 
-export { Bandera };
+export { BanderaRoja };

@@ -22,6 +22,7 @@ class Rueda extends THREE.Object3D {
     var csg = new CSG();
     csg.subtract([cilindroExtMesh, cilindroIntMesh]);
     var mesh = csg.toMesh(material);
+    mesh.rotateX(Math.PI/2);
     this.add(mesh);
   }
 

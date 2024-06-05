@@ -12,6 +12,8 @@ import { DRS } from '../models/DRS/DRS.js'
 import { Bandera } from '../models/Bandera/Bandera.js'
 import { Cronometro } from '../models/Cronometro/Cronometro.js'
 import { Pistola } from '../models/Pistola/Pistola.js'
+import { ZonaMojada } from '../models/ZonaMojada/ZonaMojada.js'
+import { Rueda } from '../models/Rueda/Rueda.js'
 import * as Tween from '../libs/tween.esm.js'
 
 class PistaMaestra extends THREE.Object3D {
@@ -65,6 +67,8 @@ class PistaMaestra extends THREE.Object3D {
     this.score = 0;
 
     /****************************************************************************/
+
+    this.tieneRueda = false;
 
 
     /******************************BOMBA*****************************************/
@@ -171,6 +175,18 @@ class PistaMaestra extends THREE.Object3D {
   this.pistolaActiva = true;
 /****************************************************************************/
 
+/******************************Zona Mojada***************************************/
+  this.zonaMojada = new ZonaMojada();
+  this.add(this.zonaMojada);
+  this.zonaMojada.position.z += 2*radio -0.4;
+  this.zonaMojada.position.x -= 4 +radio;
+/****************************************************************************/
+
+/******************************Rueda***************************************/
+this.rueda = new Rueda();
+this.add(this.rueda);
+this.rueda.position.set(3* radio + 2, 3, 1.5 * radio + 5);
+
 
 /*************************COLISIONES***********************************/
 //Creamos una caja para todos los objetos de la escena, que luego servira para gestionar las colisiones
@@ -184,6 +200,8 @@ class PistaMaestra extends THREE.Object3D {
   this.cajaBandera = new THREE.Box3();  
   this.cajaCronometro = new THREE.Box3();
   this.cajaPistola = new THREE.Box3();
+  this.cajaZonaMojada = new THREE.Box3();
+  this.cajaRueda = new THREE.Box3();
 /**********************************************************************/
   }
 
@@ -462,6 +480,7 @@ crearAnimacion(splinePersonaje, iniciada) {
     this.cajaBandera.setFromObject(this.bandera);
     this.cajaCronometro.setFromObject(this.cronometro);
     this.cajaPistola.setFromObject(this.pistola);
+    this.cajaZonaMojada.setFromObject(this.zonaMojada);
 
     //Si el personaje colisiona con un objeto, su velocidad y puntaje se ven afectados
     if(this.cajaPersonaje.intersectsBox(this.cajaPistola) && this.pistolaActiva == true){
@@ -543,6 +562,17 @@ crearAnimacion(splinePersonaje, iniciada) {
     if(this.cajaPersonaje.intersectsBox(this.cajaPeaje) && this.peaje.levantado == false){
       this.score = 0;
       this.updateScoreDisplay(this.score, true);
+    }
+
+    if(this.cajaPersonaje.intersectsBox(this.cajaZonaMojada) && this.tieneRueda == false){
+      this.modificarVelocidad(-2);
+    }
+
+    if(this.cajaPersonaje.intersectsBox(this.cajaRueda)){
+      this.tieneRueda = true;
+      this.remove(this.rueda);
+      this.score += 5;
+      this.updateScoreDisplay(this.score);
     }
 
   }

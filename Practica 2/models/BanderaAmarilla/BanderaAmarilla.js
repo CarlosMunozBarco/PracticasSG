@@ -1,7 +1,6 @@
 import * as THREE from '../../libs/three.module.js';
-import { CSG } from '../../libs/CSG-v2.js';
 
-class Bandera extends THREE.Object3D {
+class BanderaAmarilla extends THREE.Object3D {
   constructor(gui, titleGui) {
     super();
     
@@ -10,7 +9,7 @@ class Bandera extends THREE.Object3D {
     this.createGUI(gui, titleGui);
     
     // Definición del material.
-    var materialBandera = new THREE.MeshStandardMaterial({ color: 0xff0000, roughness: 1, side: THREE.DoubleSide });
+    var materialBandera = new THREE.MeshStandardMaterial({ color: 0xffff00, roughness: 1, side: THREE.DoubleSide });
     var materialPalo = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.5 });
 
     // Crear el cilindro (mástil de la bandera)
@@ -55,4 +54,4 @@ class Bandera extends THREE.Object3D {
   }
 }
 
-export { Bandera };
+export { BanderaAmarilla };
