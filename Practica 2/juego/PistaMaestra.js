@@ -25,9 +25,10 @@ class PistaMaestra extends THREE.Object3D {
 
     //Se definen las variables constantes y valores numéricos
     const radio = 20; //El radio que define lo grande o pequeño que sera el circuito
+    this.radio = radio; //Variable global para que lo usen las funciones que lo necesiten
     this.velocidadActual = 30000; //Velocidad del coche (tiempo que tarda en dar una vuelta)
     this.velocidadMinima = 15000; //Velocidad maxima del coche (el tiempo minimo que puede tardar en dar una vuelta)
-
+    this.gameOver = false; //Definimos la variable que termina cuando ha terminado el juego
     //Guardamos la escena
     this.scene = scene;
 
@@ -175,18 +176,17 @@ class PistaMaestra extends THREE.Object3D {
   this.pistolaActiva = true;
 /****************************************************************************/
 
-/******************************Zona Mojada***************************************/
+/******************************ZONA MOJADA**********************************/
   this.zonaMojada = new ZonaMojada();
   this.add(this.zonaMojada);
   this.zonaMojada.position.z += 2*radio -0.4;
   this.zonaMojada.position.x -= 4 +radio;
+  this.mojadoActivo = true;
 /****************************************************************************/
 
-/******************************Rueda***************************************/
-this.rueda = new Rueda();
-this.add(this.rueda);
-this.rueda.position.set(3* radio + 2, 3, 1.5 * radio + 5);
-
+/******************************RUEDA*************************************/
+this.crearRueda();
+/***********************************************************************/
 
 /*************************COLISIONES***********************************/
 //Creamos una caja para todos los objetos de la escena, que luego servira para gestionar las colisiones
@@ -252,7 +252,7 @@ onMouseClick(event) {
 
   //Crea el cronometro y lo situa en el lugar correcto
   crearCronometro(){
-    const radio = 20;
+    const radio = this.radio;
     this.cronometro = new Cronometro();
     this.add(this.cronometro);
     this.cronometro.scale.set(2, 2, 2);
@@ -262,6 +262,15 @@ onMouseClick(event) {
     this.cronometro.position.x -= 2*radio;
     this.cronometroActivo = true;
     
+  }
+
+  //Crea la rueda y la situa en el lugar correcto
+  crearRueda(){
+    const radio = this.radio;
+    this.rueda = new Rueda();
+    this.add(this.rueda);
+    this.rueda.position.set(3* radio + 2, 3, 1.5 * radio + 5);
+    this.ruedaActiva = true;
   }
 
   // Implementa el método updateScoreDisplay
@@ -322,8 +331,8 @@ onMouseClick(event) {
 //que sustituye a la antigua
 modificarVelocidad(cantidad){
 
-  if(this.velocidadActual - 2000*cantidad > this.velocidadMinima){
-    this.velocidadActual -= 2000*cantidad;
+  if(this.velocidadActual - 3000*cantidad > this.velocidadMinima){
+    this.velocidadActual -= 3000*cantidad;
   }else{
     this.velocidadActual = this.velocidadMinima;
   }
@@ -393,6 +402,8 @@ crearAnimacion(splinePersonaje, iniciada) {
        if (origen.t >= 1.0 ) {
         if(this.velocidadActual > this.velocidadMinima){
           this.velocidadActual *= 0.9; // Aumentar la velocidad un 10%
+          this.tieneRueda = false; //Tras cada vuelta, se pierden los neumáticos de lluvia
+          this.mojadoActivo = true;
         }
         this.crearAnimacion(splinePersonaje, false); // Reiniciar la animación con la nueva velocidad
       }
@@ -481,6 +492,7 @@ crearAnimacion(splinePersonaje, iniciada) {
     this.cajaCronometro.setFromObject(this.cronometro);
     this.cajaPistola.setFromObject(this.pistola);
     this.cajaZonaMojada.setFromObject(this.zonaMojada);
+    this.cajaRueda.setFromObject(this.rueda);
 
     //Si el personaje colisiona con un objeto, su velocidad y puntaje se ven afectados
     if(this.cajaPersonaje.intersectsBox(this.cajaPistola) && this.pistolaActiva == true){
@@ -507,12 +519,12 @@ crearAnimacion(splinePersonaje, iniciada) {
       this.cronometroActivo = false;
       this.score += 3;
       this.updateScoreDisplay(this.score);
-
-      //El cronometro es el único objeto que reaparece tras cogerlo
-      setTimeout(() => {
+      this.modificarVelocidad(1);
+      //El cronometro reaparece tras cogerlo
+      setTimeout(() => { 
         this.crearCronometro();
       }, 2000);
-      this.modificarVelocidad(1);
+      
     }
 
     if(this.cajaPersonaje.intersectsBox(this.cajaTrofeo) && this.trofeoActivo == true){
@@ -564,26 +576,40 @@ crearAnimacion(splinePersonaje, iniciada) {
       this.updateScoreDisplay(this.score, true);
     }
 
-    if(this.cajaPersonaje.intersectsBox(this.cajaZonaMojada) && this.tieneRueda == false){
-      this.modificarVelocidad(-2);
+    if(this.cajaPersonaje.intersectsBox(this.cajaZonaMojada) && this.tieneRueda == false && this.mojadoActivo == true){
+      this.modificarVelocidad(-3);
+      this.mojadoActivo = false;
     }
 
-    if(this.cajaPersonaje.intersectsBox(this.cajaRueda)){
+    if(this.cajaPersonaje.intersectsBox(this.cajaRueda) && this.ruedaActiva == true){
+      this.ruedaActiva = false;
       this.tieneRueda = true;
       this.remove(this.rueda);
       this.score += 5;
       this.updateScoreDisplay(this.score);
+      
+      //La rueda reaparece tras cogerla
+      setTimeout(() => {
+        this.crearRueda();
+      }, 2000);
     }
+  }
 
+  comprobarPuntuacion(){
+    if(this.score >= 33){
+      this.gameOver = true;
+    }
   }
   
   update () {
-    Tween.update();
-    this.gestionarColisiones();
-    if(this.peaje){
-      this.peaje.update();
+    if(!this.gameOver){
+      Tween.update();
+      this.gestionarColisiones();
+      if(this.peaje){
+        this.peaje.update();
+      }
+      this.comprobarPuntuacion();
     }
-  
   }
 }
 

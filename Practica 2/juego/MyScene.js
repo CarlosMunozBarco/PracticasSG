@@ -37,7 +37,7 @@ class MyScene extends THREE.Scene {
     
     // Configurar evento de teclado para cambiar cámaras
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'c') {
+      if (event.key === ' ' || event.key === 'Space') {
         this.toggleCamera();
       }
     });
